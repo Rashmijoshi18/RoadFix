@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoadFix - Citizen Feedback</title>
+    <!-- Outfit Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="js/theme.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo"><i class="fas fa-road"></i> RoadFix</a>
+            <div class="nav-right">
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="report.html" class="active">Report Issue</a></li>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="faq.html">FAQ</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Theme">
+                    <i class="fas fa-moon" id="theme-icon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <div class="container">
+            <h1>Report Road Issues <span>Instantly.</span></h1>
+            <p>Help us map out potholes, blocked drains, and other road infrastructure problems. Your reports help maintenance crews fix issues faster than ever.</p>
+        </div>
+    </div>
+
+    <main class="container">
+        <section class="form-container">
+            <form id="reportForm">
+                <div class="form-group">
+                    <label for="title">Issue Title <span class="required">*</span></label>
+                    <input type="text" id="title" name="title" required placeholder="e.g., Deep pothole on Main Street">
+                </div>
+
+                <div class="form-group grid-2">
+                    <div>
+                        <label for="category">Category <span class="required">*</span></label>
+                        <select id="category" name="category" required>
+                            <option value="" disabled selected>Select an issue category</option>
+                            <option value="Pothole">Pothole</option>
+                            <option value="Blocked Drain">Blocked Drain</option>
+                            <option value="Streetlight Issue">Streetlight Issue</option>
+                            <option value="Faded Road Signs">Faded Road Signs</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="image">Upload Image</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-camera"></i>
+                            <input type="file" id="image" name="image" accept="image/*">
+                        </div>
+                        <div class="help-text">Attach a photo of the road issue (Max 5MB).</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Detailed Description</label>
+                    <textarea id="description" name="description" rows="4" placeholder="Provide any additional context, landmarks, or details..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Pin Location <span class="required">*</span></label>
+                    <div class="help-text">Click on the map to pin the exact location or drag the marker.</div>
+                    <div id="map" class="map-container"></div>
+                    <input type="hidden" id="latitude" name="latitude" required>
+                    <input type="hidden" id="longitude" name="longitude" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="address">Nearest Address / Landmark</label>
+                    <input type="text" id="address" name="address" placeholder="e.g., Near City Mall North Entrance">
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <i class="fas fa-paper-plane"></i> Submit Report
+                </button>
+                <div id="formMessage" class="message hidden"></div>
+            </form>
+
+            <!-- Success Banner (shown after submission) -->
+            <div id="successBanner" class="success-banner hidden">
+                <div class="success-banner-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="success-banner-body">
+                    <h3>Report Submitted Successfully! 🎉</h3>
+                    <p id="successDetail">Your issue has been logged and assigned a tracking ID.</p>
+                    <div class="success-banner-actions">
+                        <button class="btn-success-report" onclick="resetToForm()">
+                            <i class="fas fa-plus"></i> Submit Another Report
+                        </button>
+                        <a href="dashboard.html" class="btn-success-dashboard">
+                            <i class="fas fa-tachometer-alt"></i> View on Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

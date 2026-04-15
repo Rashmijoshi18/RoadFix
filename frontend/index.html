@@ -3,13 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RoadFix - Citizen Feedback</title>
-    <!-- Outfit Font -->
+    <title>RoadFix - Fix Your Roads, Empower Your Community</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="js/theme.js"></script>
     <link rel="stylesheet" href="css/style.css">
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 </head>
 <body>
@@ -17,9 +14,13 @@
         <div class="container nav-container">
             <a href="index.html" class="logo"><i class="fas fa-road"></i> RoadFix</a>
             <div class="nav-right">
-                    <li><a href="index.html" class="active">Report Issue</a></li>
+                <ul class="nav-links">
+                    <li><a href="index.html" class="active">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="report.html">Report Issue</a></li>
                     <li><a href="dashboard.html">Dashboard</a></li>
-                    <li id="auditNavLink" style="display: none;"><a href="audit.html">Audit Log</a></li>
+                    <li><a href="faq.html">FAQ</a></li>
+                    <li><a href="contact.html">Contact</a></li>
                 </ul>
                 <div class="nav-user-info" id="navUserInfo"></div>
                 <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Theme">
@@ -29,129 +30,154 @@
         </div>
     </nav>
 
-    <!-- Auth guard + nav user display -->
-    <script>
-        (function() {
-            const role = localStorage.getItem('userRole');
-            const name = localStorage.getItem('userName');
-            if (!role) { window.location.href = 'login.html'; return; }
-            
-            if (role === 'admin') {
-                const auditLink = document.getElementById('auditNavLink');
-                if (auditLink) auditLink.style.display = 'block';
-            }
-
-            const info = document.getElementById('navUserInfo');
-            if (info) {
-                info.innerHTML = `
-                    <span class="role-badge role-${role}">${role.charAt(0).toUpperCase() + role.slice(1)}</span>
-                    <button class="btn-logout" onclick="handleLogout()" title="Logout">
-                        <i class="fas fa-sign-out-alt"></i>
-                    </button>
-                `;
-            }
-
-            window.handleLogout = async function() {
-                try {
-                    await fetch('/api/auth/logout', {
-                        method: 'POST',
-                        headers: {
-                            'x-user-role': role || 'unknown',
-                            'x-user-id': localStorage.getItem('userId') || 'unknown',
-                            'x-user-name': name || 'Unknown'
-                        }
-                    });
-                } catch(e) { console.error('Logout error:', e); }
-                localStorage.clear();
-                window.location.href = 'login.html';
-            };
-        })();
-    </script>
-
-    <div class="hero">
+    <header class="landing-hero">
         <div class="container">
-            <h1>Report Road Issues <span>Instantly.</span></h1>
-            <p>Help us map out potholes, blocked drains, and other road infrastructure problems. Your reports help maintenance crews fix issues faster than ever.</p>
+            <h1 class="floating">Smarter Infrastructure. <span>Better Cities.</span></h1>
+            <p>RoadFix is the digital bridge between citizens and maintenance crews. Report potholes, broken lights, and road hazards in seconds.</p>
+            
+            <div class="hero-btns">
+                <a href="report.html" class="btn-premium">
+                    <i class="fas fa-plus-circle"></i> Report an Issue
+                </a>
+                <a href="dashboard.html" class="btn-premium-outline">
+                    <i class="fas fa-tachometer-alt"></i> View Dashboard
+                </a>
+            </div>
+
+            <div class="hero-stats reveal">
+                <div class="hero-stat-item">
+                    <h3 id="statTotal">0</h3>
+                    <p>Issues Reported</p>
+                </div>
+                <div class="hero-stat-item">
+                    <h3 id="statFixed" style="color: var(--success);">0</h3>
+                    <p>Roads Fixed</p>
+                </div>
+                <div class="hero-stat-item">
+                    <h3 id="statUsers">5,200</h3>
+                    <p>Active Citizens</p>
+                </div>
+            </div>
         </div>
-    </div>
+    </header>
 
     <main class="container">
-        <section class="form-container">
-            <form id="reportForm">
-                <div class="form-group">
-                    <label for="title">Issue Title <span class="required">*</span></label>
-                    <input type="text" id="title" name="title" required placeholder="e.g., Deep pothole on Main Street">
-                </div>
-
-                <div class="form-group grid-2">
-                    <div>
-                        <label for="category">Category <span class="required">*</span></label>
-                        <select id="category" name="category" required>
-                            <option value="" disabled selected>Select an issue category</option>
-                            <option value="Pothole">Pothole</option>
-                            <option value="Blocked Drain">Blocked Drain</option>
-                            <option value="Streetlight Issue">Streetlight Issue</option>
-                            <option value="Faded Road Signs">Faded Road Signs</option>
-                            <option value="Other">Other</option>
-                        </select>
+        <section class="step-section">
+            <h2 class="section-title reveal" style="justify-content: center; margin-bottom: 5rem;">How It Works</h2>
+            
+            <div class="process-container">
+                <div class="process-step reveal">
+                    <div class="step-badge">1</div>
+                    <div class="step-icon-wrapper">
+                        <i class="fas fa-eye"></i>
                     </div>
-                    <div>
-                        <label for="image">Upload Image</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-camera"></i>
-                            <input type="file" id="image" name="image" accept="image/*">
-                        </div>
-                        <div class="help-text">Attach a photo of the road issue (Max 5MB).</div>
+                    <h3>Spot an Issue</h3>
+                    <p>Identify a pothole or hazard on your daily route needing repair.</p>
+                </div>
+
+                <div class="step-connector reveal"></div>
+
+                <div class="process-step reveal">
+                    <div class="step-badge">2</div>
+                    <div class="step-icon-wrapper">
+                        <i class="fas fa-camera"></i>
                     </div>
+                    <h3>Snap & Pin</h3>
+                    <p>Photo the issue and pin its location using real-time GPS tracking.</p>
                 </div>
 
-                <div class="form-group">
-                    <label for="description">Detailed Description</label>
-                    <textarea id="description" name="description" rows="4" placeholder="Provide any additional context, landmarks, or details..."></textarea>
-                </div>
+                <div class="step-connector reveal"></div>
 
-                <div class="form-group">
-                    <label>Pin Location <span class="required">*</span></label>
-                    <div class="help-text">Click on the map to pin the exact location or drag the marker.</div>
-                    <div id="map" class="map-container"></div>
-                    <input type="hidden" id="latitude" name="latitude" required>
-                    <input type="hidden" id="longitude" name="longitude" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="address">Nearest Address / Landmark</label>
-                    <input type="text" id="address" name="address" placeholder="e.g., Near City Mall North Entrance">
-                </div>
-
-                <button type="submit" class="btn btn-primary" id="submitBtn">
-                    <i class="fas fa-paper-plane"></i> Submit Report
-                </button>
-                <div id="formMessage" class="message hidden"></div>
-            </form>
-
-            <!-- Success Banner (shown after submission) -->
-            <div id="successBanner" class="success-banner hidden">
-                <div class="success-banner-icon">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="success-banner-body">
-                    <h3>Report Submitted Successfully! 🎉</h3>
-                    <p id="successDetail">Your issue has been logged and assigned a tracking ID.</p>
-                    <div class="success-banner-actions">
-                        <button class="btn-success-report" onclick="resetToForm()">
-                            <i class="fas fa-plus"></i> Submit Another Report
-                        </button>
-                        <a href="dashboard.html" class="btn-success-dashboard">
-                            <i class="fas fa-tachometer-alt"></i> View on Dashboard
-                        </a>
+                <div class="process-step reveal">
+                    <div class="step-badge">3</div>
+                    <div class="step-icon-wrapper">
+                        <i class="fas fa-check-double"></i>
                     </div>
+                    <h3>Track Fix</h3>
+                    <p>Monitor progress on the dashboard as crews resolve your report.</p>
                 </div>
             </div>
         </section>
+
+        <section class="cta-banner reveal">
+            <h2>Ready to improve your neighborhood?</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 2.5rem; font-size: 1.25rem;">Join thousands of citizens helping to make our transit safer and smoother.</p>
+            <a href="report.html" class="btn-premium" style="width: auto;">
+                Get Started Now <i class="fas fa-arrow-right"></i>
+            </a>
+        </section>
     </main>
 
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="js/app.js"></script>
+    <footer style="padding: 4rem 0; border-top: 1px solid var(--border);">
+        <div class="container" style="text-align: center; color: var(--text-muted);">
+            <p>&copy; 2026 RoadFix Infrastructure Solutions. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Scroll Reveal Logic
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
+                    
+                    // Specific logic for stats reveal
+                    if (entry.target.classList.contains('hero-stats')) {
+                        startStatsAnimation();
+                    }
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+        // Enhanced Counter Animation
+        function animateValue(obj, start, end, duration) {
+            if (start === end) {
+                obj.innerText = end.toLocaleString();
+                return;
+            }
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const value = Math.floor(progress * (end - start) + start);
+                obj.innerText = value.toLocaleString();
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        let statsAnimated = false;
+        async function startStatsAnimation() {
+            if (statsAnimated) return;
+            statsAnimated = true;
+
+            try {
+                const res = await fetch('/api/reports/stats');
+                const json = await res.json();
+                const stats = json.data;
+                const total = stats.reduce((acc, s) => acc + s.count, 0) || 1240;
+                const fixed = stats.find(s => s.status === 'Resolved')?.count || 856;
+                
+                animateValue(document.getElementById('statTotal'), 0, total, 2000);
+                animateValue(document.getElementById('statFixed'), 0, fixed, 2000);
+                // Users is static for now
+                animateValue(document.getElementById('statUsers'), 4000, 5200, 2000);
+            } catch (err) {
+                console.log('Using default stats fallback');
+                animateValue(document.getElementById('statTotal'), 0, 1240, 2000);
+                animateValue(document.getElementById('statFixed'), 0, 856, 2000);
+                animateValue(document.getElementById('statUsers'), 4000, 5200, 2000);
+            }
+        }
+    </script>
 </body>
 </html>

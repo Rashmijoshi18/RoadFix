@@ -169,6 +169,37 @@ app.delete('/api/reports/:id', checkRole(['admin']), (req, res) => {
     res.json({ success: true, data: { message: 'Deleted' }, error: null });
 });
 
+// ----- CONTACT API -----
+const contactDbPath = path.join(__dirname, 'db', 'contact_messages.txt');
+if (!fs.existsSync(path.dirname(contactDbPath))) fs.mkdirSync(path.dirname(contactDbPath), { recursive: true });
+if (!fs.existsSync(contactDbPath)) fs.writeFileSync(contactDbPath, JSON.stringify([]), 'utf-8');
+
+app.post('/api/contact', (req, res) => {
+    const { name, email, subject, message } = req.body;
+    if (!name || !email || !message) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    try {
+        const raw = fs.readFileSync(contactDbPath, 'utf-8');
+        const messages = raw ? JSON.parse(raw) : [];
+        const newMessage = {
+            id: Date.now(),
+            name,
+            email,
+            subject,
+            message,
+            created_at: new Date().toISOString()
+        };
+        messages.push(newMessage);
+        fs.writeFileSync(contactDbPath, JSON.stringify(messages, null, 2), 'utf-8');
+        res.status(201).json({ message: 'Contact message received' });
+    } catch (err) {
+        console.error('Error saving contact message:', err);
+        res.status(500).json({ error: 'Failed to save message' });
+    }
+});
+
 // START
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

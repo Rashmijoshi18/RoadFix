@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ - RoadFix Support</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="js/theme.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo"><i class="fas fa-road"></i> RoadFix</a>
+            <div class="nav-right">
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="report.html">Report Issue</a></li>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="faq.html" class="active">FAQ</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Theme">
+                    <i class="fas fa-moon" id="theme-icon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <header class="info-hero">
+        <div class="container">
+            <h1>Frequently Asked Questions</h1>
+            <p>Everything you need to know about reporting road issues and how our system works.</p>
+        </div>
+    </header>
+
+    <main class="container info-main">
+        <div class="faq-container">
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <div class="faq-question">
+                    <span>How do I report a new road issue?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Simply navigate to the "Report Issue" page, fill in the title, category, and description. Most importantly, pin the location on the map and upload a clear photo of the issue. Once you submit, it will appear on our public dashboard.</p>
+                </div>
+            </div>
+
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <div class="faq-question">
+                    <span>How long does it take for an issue to be fixed?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Fix times vary depending on the severity of the issue and budget allocation. Potholes are usually prioritized for safety. You can track the status of any report on the Dashboard—it will change from "Reported" to "In Progress" and finally "Resolved".</p>
+                </div>
+            </div>
+
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <div class="faq-question">
+                    <span>Can I report an issue without a photo?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Yes, you can. However, reports with high-quality photos are significantly more helpful for repair crews to assess the equipment and materials needed before they arrive on site.</p>
+                </div>
+            </div>
+
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <div class="faq-question">
+                    <span>Is my personal information public?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>No. Currently, RoadFix does not require individual user accounts or display person-identifiable information on reports. Only the issue details and location are public.</p>
+                </div>
+            </div>
+
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <div class="faq-question">
+                    <span>Who actually fixes the roads?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>RoadFix is a communication platform. The actual repairs are carried out by the local Public Works Department or contracted maintenance crews after receiving your data through our system.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function toggleFaq(element) {
+            element.classList.toggle('active');
+            
+            // Close other items if desired
+            const items = document.querySelectorAll('.faq-item');
+            items.forEach(item => {
+                if (item !== element) {
+                    item.classList.remove('active');
+                }
+            });
+        }
+    </script>
+
+    <footer style="padding: 4rem 0; border-top: 1px solid var(--border); margin-top: 4rem;">
+        <div class="container" style="text-align: center; color: var(--text-muted);">
+            <p>&copy; 2026 RoadFix Infrastructure Solutions. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

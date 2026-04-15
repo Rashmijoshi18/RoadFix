@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About RoadFix - Citizen Empowerment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="js/theme.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo"><i class="fas fa-road"></i> RoadFix</a>
+            <div class="nav-right">
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html" class="active">About</a></li>
+                    <li><a href="report.html">Report Issue</a></li>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="faq.html">FAQ</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Theme">
+                    <i class="fas fa-moon" id="theme-icon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <header class="info-hero">
+        <div class="container">
+            <h1>Our Mission: <span>Safer Roads for All.</span></h1>
+            <p>RoadFix is a community-driven platform designed to bridge the gap between citizens and local authorities to ensure our infrastructure stays in top shape.</p>
+        </div>
+    </header>
+
+    <main class="container info-main">
+        <section class="about-grid">
+            <div class="about-content">
+                <h2>Why RoadFix?</h2>
+                <p>Poor road conditions like potholes, broken streetlights, and faded signs aren't just inconvenient—they're dangerous. Traditionally, reporting these issues involved complex bureaucracy and long wait times.</p>
+                <p>RoadFix changes that by providing a streamlined, GPS-enabled reporting tool that puts the power of change directly into the hands of the citizens.</p>
+                <a href="index.html" class="btn btn-primary" style="width: auto; padding: 1rem 2.5rem;">
+                    Start Reporting <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            <div class="about-image">
+                <!-- Image placeholder for road maintenance -->
+                <img src="https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?q=80&w=1000&auto=format&fit=crop" alt="Road Maintenance" style="width: 100%; border-radius: var(--radius-lg); box-shadow: var(--shadow-xl);">
+            </div>
+        </section>
+
+        <section class="about-features">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-map-marker-alt"></i></div>
+                <h3>Precision Tracking</h3>
+                <p>Using real-time geolocation, we pinpoint exactly where the issue is, making it easier for repair crews to find and fix it.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                <h3>Public Accountability</h3>
+                <p>Our public dashboard allows everyone to see reported issues and track their progress from "Reported" to "Resolved".</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-bolt"></i></div>
+                <h3>Faster Response</h3>
+                <p>By digitizing the reporting process, we reduce administrative delays and help prioritize high-impact road repairs.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer style="padding: 4rem 0; border-top: 1px solid var(--border); margin-top: 4rem;">
+        <div class="container" style="text-align: center; color: var(--text-muted);">
+            <p>&copy; 2026 RoadFix Infrastructure Solutions. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
