@@ -5,28 +5,6 @@ const API_URL = '/api/reports';
 let map;
 let marker;
 
-// Toast Utility
-function showToast(message, type = 'success') {
-    const container = document.getElementById('toast-container');
-    if (!container) return;
-    
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    
-    let icon = 'info-circle';
-    if (type === 'success') icon = 'check-circle';
-    if (type === 'error') icon = 'exclamation-circle';
-    if (type === 'warning') icon = 'exclamation-triangle';
-    
-    toast.innerHTML = `<i class="fas fa-${icon}"></i> <span>${message}</span>`;
-    container.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.classList.add('hiding');
-        setTimeout(() => toast.remove(), 300);
-    }, 4000);
-}
-
 document.addEventListener('DOMContentLoaded', () => {
     // Only initialize map if coordinates exist on page (index.html)
     const mapElement = document.getElementById('map');
@@ -97,7 +75,7 @@ async function handleFormSubmit(e) {
     // Disable btn and show spinner
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
-    msgBox.className = 'message hidden';
+    if (msgBox) msgBox.className = 'message hidden';
 
     try {
         const formData = new FormData(form);
@@ -105,7 +83,7 @@ async function handleFormSubmit(e) {
         // Send as multipart/form-data so the server (multer) can receive the image file
         const response = await fetch(API_URL, {
             method: 'POST',
-            body: formData,   // DO NOT set Content-Type header; browser sets it with boundary automatically
+            body: formData,
             headers: {
                 'x-user-role': localStorage.getItem('userRole') || 'unknown',
                 'x-user-id': localStorage.getItem('userId') || 'unknown',
@@ -123,9 +101,13 @@ async function handleFormSubmit(e) {
             form.style.display = 'none';
             const banner = document.getElementById('successBanner');
             const detail = document.getElementById('successDetail');
-            detail.innerHTML = `"<strong>${reportTitle}</strong>" has been logged with Tracking ID <strong>#${data.reportId}</strong>. Our team will review it shortly.`;
-            banner.classList.remove('hidden');
-            banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (detail) {
+                detail.innerHTML = `"<strong>${reportTitle}</strong>" has been logged with Tracking ID <strong>#${data.data ? data.data.reportId : data.reportId}</strong>. Our team will review it shortly.`;
+            }
+            if (banner) {
+                banner.classList.remove('hidden');
+                banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
 
             // Also reset the internal form data & map
             form.reset();
@@ -139,7 +121,7 @@ async function handleFormSubmit(e) {
         }
     } catch (err) {
         console.error(err);
-        showToast(err.message || 'An error occurred. Please try again.', 'error');
+        if (window.showToast) window.showToast(err.message || 'An error occurred. Please try again.', 'error');
     } finally {
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Report';
@@ -147,11 +129,12 @@ async function handleFormSubmit(e) {
 }
 
 // Restore the form after showing the success banner
-function resetToForm() {
+window.resetToForm = function() {
     const banner = document.getElementById('successBanner');
     const form = document.getElementById('reportForm');
-    banner.classList.add('hidden');
-    form.style.display = '';
-    // Scroll back up to the form smoothly
-    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
+    if (banner) banner.classList.add('hidden');
+    if (form) {
+        form.style.display = '';
+        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+};

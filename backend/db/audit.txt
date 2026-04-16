@@ -1,7 +1,235 @@
 [
   {
-    "id": "c210f648-0339-48bf-b420-13703fe0a4ad",
-    "timestamp": "2026-04-15T11:42:29.459Z",
+    "id": "9886b79d-6347-4a68-b801-2c629971b017",
+    "timestamp": "2026-04-16T10:15:21.459Z",
+    "action": "user.logout",
+    "actor": {
+      "id": "2",
+      "name": "Raj Kumar",
+      "role": "inspector"
+    },
+    "reportId": null,
+    "details": "User Raj Kumar logged out"
+  },
+  {
+    "id": "467733f1-c7ed-4f66-817d-44433997496d",
+    "timestamp": "2026-04-16T09:03:35.687Z",
+    "action": "user.login",
+    "actor": {
+      "id": 2,
+      "name": "Raj Kumar",
+      "role": "inspector"
+    },
+    "reportId": null,
+    "details": "User Raj Kumar logged into the system"
+  },
+  {
+    "id": "f4146746-f74b-459a-9e2a-426c086b4b57",
+    "timestamp": "2026-04-16T09:01:00.426Z",
+    "action": "user.logout",
+    "actor": {
+      "id": "1",
+      "name": "Alice",
+      "role": "admin"
+    },
+    "reportId": null,
+    "details": "User Alice logged out"
+  },
+  {
+    "id": "b3dd011e-e224-41df-b4c3-294682cb2355",
+    "timestamp": "2026-04-16T08:34:49.469Z",
+    "action": "user.login",
+    "actor": {
+      "id": 1,
+      "name": "Alice",
+      "role": "admin"
+    },
+    "reportId": null,
+    "details": "User Alice logged into the system"
+  },
+  {
+    "id": "b20e7e35-f0ca-4891-9976-686cdee14d94",
+    "timestamp": "2026-04-16T08:34:44.814Z",
+    "action": "user.logout",
+    "actor": {
+      "id": "3",
+      "name": "Priya",
+      "role": "citizen"
+    },
+    "reportId": null,
+    "details": "User Priya logged out"
+  },
+  {
+    "id": "761d27f3-03f2-4e9c-be51-23cd0f3cbda9",
+    "timestamp": "2026-04-16T08:16:33.322Z",
+    "action": "user.login",
+    "actor": {
+      "id": 3,
+      "name": "Priya",
+      "role": "citizen"
+    },
+    "reportId": null,
+    "details": "User Priya logged into the system"
+  },
+  {
+    "id": "457b1a34-7bb6-44e1-ab20-7819f204f534",
+    "timestamp": "2026-04-16T08:10:33.540Z",
+    "action": "user.login",
+    "actor": {
+      "id": 3,
+      "name": "Priya",
+      "role": "citizen"
+    },
+    "reportId": null,
+    "details": "User Priya logged into the system"
+  },
+  {
+    "id": "3f3b6a9b-ddfd-41d1-bc31-e58ba1b5bc0c",
+    "timestamp": "2026-04-16T08:10:25.646Z",
+    "action": "user.logout",
+    "actor": {
+      "id": "1",
+      "name": "Alice",
+      "role": "admin"
+    },
+    "reportId": null,
+    "details": "User Alice logged out"
+  },
+  {
+    "id": "bfc642a8-505c-49bb-9549-3c8c43143f2a",
+    "timestamp": "2026-04-16T08:10:18.558Z",
+    "action": "report.status_changed",
+    "actor": {
+      "id": "1",
+      "name": "Alice",
+      "role": "admin"
+    },
+    "reportId": "1",
+    "details": "Status changed from Resolved to Reported for report #1"
+  },
+  {
+    "id": "ebeb1de5-85a0-42fb-b970-2386dc25dd65",
+    "timestamp": "2026-04-16T08:10:14.741Z",
+    "action": "report.status_changed",
+    "actor": {
+      "id": "1",
+      "name": "Alice",
+      "role": "admin"
+    },
+    "reportId": "2",
+    "details": "Status changed from Reported to In Progress for report #2"
+  },
+  {
+    "id": "8921bb79-19a2-4ee4-9323-25760d3fdf97",
+    "timestamp": "2026-04-16T08:09:24.385Z",
+    "action": "user.login",
+    "actor": {
+      "id": 1,
+      "name": "Alice",
+      "role": "admin"
+    },
+    "reportId": null,
+    "details": "User Alice logged into the system"
+  },
+  {
+    "id": "2785ebbe-769a-4c93-a5ba-0ea8d4fdcc0e",
+    "timestamp": "2026-04-16T08:09:18.503Z",
+    "action": "user.logout",
+    "actor": {
+      "id": "3",
+      "name": "Priya",
+      "role": "citizen"
+    },
+    "reportId": null,
+    "details": "User Priya logged out"
+  },
+  {
+    "id": "f610560b-b1b8-4680-b2b9-f9366a6c26e3",
+    "timestamp": "2026-04-16T08:08:46.386Z",
+    "action": "user.login",
+    "actor": {
+      "id": 3,
+      "name": "Priya",
+      "role": "citizen"
+    },
+    "reportId": null,
+    "details": "User Priya logged into the system"
+  },
+  {
+    "id": "163b00ba-c8b5-43a0-86d7-60332c35039a",
+    "timestamp": "2026-04-16T08:08:34.082Z",
+    "action": "user.logout",
+    "actor": {
+      "id": "1",
+      "name": "Alice",
+      "role": "admin"
+    },
+    "reportId": null,
+    "details": "User Alice logged out"
+  },
+  {
+    "id": "413ea34c-b4cd-4537-ae69-f75debb15e0a",
+    "timestamp": "2026-04-15T17:10:20.465Z",
+    "action": "user.login",
+    "actor": {
+      "id": 1,
+      "name": "Alice",
+      "role": "admin"
+    },
+    "reportId": null,
+    "details": "User Alice logged into the system"
+  },
+  {
+    "id": "adaec2d4-4203-4084-add1-ae2dfa682947",
+    "timestamp": "2026-04-15T17:04:29.079Z",
+    "action": "user.logout",
+    "actor": {
+      "id": "2",
+      "name": "Raj Kumar",
+      "role": "inspector"
+    },
+    "reportId": null,
+    "details": "User Raj Kumar logged out"
+  },
+  {
+    "id": "d0ff46b0-0fb7-4089-b3de-c20037a65876",
+    "timestamp": "2026-04-15T17:04:17.867Z",
+    "action": "user.login",
+    "actor": {
+      "id": 2,
+      "name": "Raj Kumar",
+      "role": "inspector"
+    },
+    "reportId": null,
+    "details": "User Raj Kumar logged into the system"
+  },
+  {
+    "id": "d01f3510-21e3-401b-b6d7-d6619dead4d2",
+    "timestamp": "2026-04-15T17:04:13.930Z",
+    "action": "user.logout",
+    "actor": {
+      "id": "1",
+      "name": "Alice",
+      "role": "admin"
+    },
+    "reportId": null,
+    "details": "User Alice logged out"
+  },
+  {
+    "id": "29b3d579-f046-4386-bb77-fcb6c22aacf0",
+    "timestamp": "2026-04-15T17:03:10.527Z",
+    "action": "user.login",
+    "actor": {
+      "id": 1,
+      "name": "Alice",
+      "role": "admin"
+    },
+    "reportId": null,
+    "details": "User Alice logged into the system"
+  },
+  {
+    "id": "7d0fec29-7d26-4cf8-b8d0-6b80c4022b97",
+    "timestamp": "2026-04-15T17:03:03.332Z",
     "action": "user.logout",
     "actor": {
       "id": "3",
@@ -22,5 +250,29 @@
     },
     "reportId": null,
     "details": "User Priya logged into the system"
+  },
+  {
+    "id": "c210f648-0339-48bf-b420-13703fe0a4ad",
+    "timestamp": "2026-04-15T11:42:29.459Z",
+    "action": "user.logout",
+    "actor": {
+      "id": "3",
+      "name": "Priya",
+      "role": "citizen"
+    },
+    "reportId": null,
+    "details": "User Priya logged out"
+  },
+  {
+    "id": "b375467e-4611-4783-8851-32e9fce02ad1",
+    "timestamp": "2026-04-16T10:15:30.486Z",
+    "action": "user.login",
+    "actor": {
+      "id": 1,
+      "name": "Alice",
+      "role": "admin"
+    },
+    "reportId": null,
+    "details": "User Alice logged into the system"
   }
 ]

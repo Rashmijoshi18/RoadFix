@@ -21,6 +21,10 @@ const readData = () => {
                 needsSave = true;
                 r.createdAt = r.created_at || new Date().toISOString();
             }
+            if (!r.upvotedBy) {
+                needsSave = true;
+                r.upvotedBy = [];
+            }
             return r;
         });
 
@@ -78,18 +82,28 @@ const db = {
                 status: 'Reported',
                 solution: null,
                 created_at: new Date().toISOString(),
-                createdAt: new Date().toISOString()
+                createdAt: new Date().toISOString(),
+                upvotedBy: []
             };
             records.push(newRecord);
             writeData(records);
             callback.call({ lastID: newId }, null);
         } else if (query.includes('UPDATE')) {
-            const status = params[0];
             const id = params[params.length - 1];
             const index = records.findIndex(r => r.id == id);
             if (index !== -1) {
-                records[index].status = status;
-                if (params.length === 3) records[index].solution = params[1];
+                // Parsing column names from query: "UPDATE reports SET col1 = ?, col2 = ? WHERE id = ?"
+                const setClause = query.split('SET')[1].split('WHERE')[0];
+                const columns = setClause.split(',').map(c => c.trim().split('=')[0].trim());
+                
+                columns.forEach((col, idx) => {
+                    let val = params[idx];
+                    if (col === 'upvotedBy' && typeof val === 'string') {
+                        try { val = JSON.parse(val); } catch(e) {}
+                    }
+                    records[index][col] = val;
+                });
+
                 writeData(records);
                 callback.call({ changes: 1 }, null);
             } else {

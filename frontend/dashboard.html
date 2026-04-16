@@ -9,16 +9,22 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="premium-ui">
+    <div class="mesh-bg"></div>
     <nav class="navbar">
         <div class="container nav-container">
             <a href="index.html" class="logo"><i class="fas fa-road"></i> RoadFix</a>
             <div class="nav-right">
+                <ul class="nav-links">
                     <li><a href="index.html">Report Issue</a></li>
                     <li><a href="dashboard.html" class="active">Dashboard</a></li>
                     <li id="auditNavLink" style="display: none;"><a href="audit.html">Audit Log</a></li>
                 </ul>
                 <div class="nav-user-info" id="navUserInfo"></div>
+                <div class="live-indicator">
+                    <div class="live-dot offline" id="liveDot"></div>
+                    <span id="liveText">Offline</span>
+                </div>
                 <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Theme">
                     <i class="fas fa-moon" id="theme-icon"></i>
                 </button>
@@ -111,7 +117,8 @@
         </section>
     </main>
 
-    <div id="toast-container" class="toast-container"></div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/toast.js"></script>
     <script src="js/sla.js"></script>
     <script src="js/dashboard.js"></script>
 </body>

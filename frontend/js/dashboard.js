@@ -29,127 +29,129 @@ document.addEventListener('DOMContentLoaded', () => {
     setupRoleUI();
     fetchReports();
     fetchStats();
+    initSocket();
 
-    document.getElementById('filterCategory').addEventListener('change', fetchReports);
-    document.getElementById('filterStatus').addEventListener('change', fetchReports);
+    const categorySelect = document.getElementById('filterCategory');
+    const statusSelect = document.getElementById('filterStatus');
+    if (categorySelect) categorySelect.addEventListener('change', fetchReports);
+    if (statusSelect) statusSelect.addEventListener('change', fetchReports);
 });
 
+// Socket Setup
+let socketInitialized = false;
+function initSocket() {
+    if (socketInitialized) return;
+    socketInitialized = true;
+
+    const socket = io();
+    
+    socket.on("connect", () => {
+        const dot = document.querySelector(".live-dot");
+        if (dot) dot.classList.remove("offline");
+        const txt = document.getElementById("liveText");
+        if (txt) txt.textContent = "Live";
+    });
+    
+    socket.on("disconnect", () => {
+        const dot = document.querySelector(".live-dot");
+        if (dot) dot.classList.add("offline");
+        const txt = document.getElementById("liveText");
+        if (txt) txt.textContent = "Offline";
+    });
+    
+    socket.on("report:new", (report) => {
+        fetchReports(); // Simpler logic for this demo config
+        if (window.showToast) window.showToast("📍 New report: " + report.title, "info");
+        fetchStats();
+    });
+    
+    socket.on("report:updated", (report) => {
+        fetchReports();
+        if (window.showToast) window.showToast("🔄 Report #" + report.id + " \u2192 " + report.status, "success");
+        fetchStats();
+    });
+    
+    socket.on("report:deleted", ({ id }) => {
+        fetchReports();
+        if (window.showToast) window.showToast("🗑️ A report was removed", "warning");
+        fetchStats();
+    });
+    
+    socket.on("report:upvoted", ({ id, upvotes }) => {
+        const countEl = document.getElementById('upvote-count-' + id);
+        if (countEl) countEl.textContent = upvotes;
+    });
+}
+
 /**
- * Setup UI elements based on user role:
- * - Show role badge in header
- * - Show/hide controls per role
- * - Show "Assigned to me" filter for inspector
+ * Setup UI elements based on user role
  */
 function setupRoleUI() {
     const role = getUserRole();
     const name = getUserName();
 
-    // Inject role badge + user name into the dashboard header
     const headerDiv = document.querySelector('.dashboard-header > div');
     if (headerDiv) {
-        const badgeHTML = `
-            <div class="user-role-display">
-                <span class="role-badge role-${role}">${role.charAt(0).toUpperCase() + role.slice(1)}</span>
-                <span class="user-name-label">Logged in as <strong>${escapeHTML(name)}</strong></span>
-            </div>
-        `;
-        headerDiv.insertAdjacentHTML('beforeend', badgeHTML);
-    }
-
-    // Inspector: show "Assigned to me" filter
-    if (role === 'inspector') {
-        const filtersContainer = document.querySelector('.filters-container');
-        if (filtersContainer) {
-            const assignedFilter = document.createElement('div');
-            assignedFilter.className = 'filter-group';
-            assignedFilter.innerHTML = `
-                <label for="filterAssigned"><i class="fas fa-user-check"></i> View:</label>
-                <select id="filterAssigned">
-                    <option value="all">All Reports</option>
-                    <option value="mine">Assigned to Me</option>
-                </select>
-            `;
-            filtersContainer.appendChild(assignedFilter);
-            document.getElementById('filterAssigned').addEventListener('change', fetchReports);
-        }
-    }
-
-    // Admin: show export & analytics links in header
-    if (role === 'admin') {
-        const headerParent = document.querySelector('.dashboard-header');
-        if (headerParent) {
-            const adminActions = document.createElement('div');
-            adminActions.className = 'admin-header-actions';
-            adminActions.innerHTML = `
-                <button class="btn-admin-action" id="exportBtn" title="Export Reports">
-                    <i class="fas fa-file-export"></i> Export
-                </button>
-                <a href="#analytics" class="btn-admin-action" id="analyticsLink" title="Analytics">
-                    <i class="fas fa-chart-bar"></i> Analytics
-                </a>
-            `;
-            headerParent.appendChild(adminActions);
-
-            // Export handler
-            document.getElementById('exportBtn').addEventListener('click', exportReports);
-        }
-    }
-
-    // Non-admin: hide export and analytics (they won't be rendered)
-    // Citizen: also hide status update dropdown (handled in renderReports)
-}
-
-/**
- * Export reports as JSON download (admin only)
- */
-async function exportReports() {
-    try {
-        const response = await fetch(API_URL);
-        const data = await response.json();
-        if (!response.ok) {
-            showToast('Failed to export reports.', 'error');
-            return;
-        }
-        const blob = new Blob([JSON.stringify(data.data, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `roadfix-reports-${new Date().toISOString().slice(0, 10)}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-        showToast('Reports exported successfully.', 'success');
-    } catch (err) {
-        showToast('Network error while exporting.', 'error');
+        const badgeHTML = `<span class="role-badge role-${role}" style="margin-bottom: 0.5rem; display: inline-block;">
+                <i class="fas fa-shield-alt"></i> ${role.charAt(0).toUpperCase() + role.slice(1)} View
+            </span>`;
+        headerDiv.insertAdjacentHTML('afterbegin', badgeHTML);
     }
 }
 
+// Basic HTML escaper
+function escapeHTML(str) {
+    if (!str) return str;
+    return str.replace(/[&<>'"]/g, 
+        tag => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            "'": '&#39;',
+            '"': '&quot;'
+        }[tag])
+    );
+}
+
+// Fetch Reports
 async function fetchReports() {
     const loader = document.getElementById('loader');
     const grid = document.getElementById('reportsGrid');
+    if (!loader || !grid) return;
     
-    const category = document.getElementById('filterCategory').value;
-    const status = document.getElementById('filterStatus').value;
-
-    loader.style.display = 'block';
+    loader.style.display = 'flex';
     grid.innerHTML = '';
 
+    const category = document.getElementById('filterCategory').value;
+    const status = document.getElementById('filterStatus').value;
+    
+    let url = API_URL;
+    const params = new URLSearchParams();
+    if (category) params.append('category', category);
+    if (status) params.append('status', status);
+    if (params.toString()) url += `?${params.toString()}`;
+
     try {
-        let url = `${API_URL}?`;
-        if (category) url += `category=${encodeURIComponent(category)}&`;
-        if (status) url += `status=${encodeURIComponent(status)}`;
-
-        const response = await fetch(url);
-        const data = await response.json();
-
-        if (response.ok) {
-            let filteredReports = data.data;
-            if (status === 'sla-breached') {
-                filteredReports = filteredReports.filter(r => window.getSLAStatus(r) === 'breached');
+        const response = await fetch(url, {
+            headers: {
+                'x-user-role': getUserRole(),
+                'x-user-id': getUserId(),
+                'x-user-name': getUserName()
             }
-            renderReports(filteredReports);
+        });
+        const data = await response.json();
+        
+        if (response.ok) {
+            let reports = data.data || [];
+            
+            if (status === 'sla-breached') {
+                reports = reports.filter(r => window.getSLAStatus && window.getSLAStatus(r) === 'breached');
+            }
+            
+            renderReports(reports);
         } else {
             console.error('Error fetching data:', data.error);
-            grid.innerHTML = `<div class="message error"><i class="fas fa-exclamation-triangle"></i> Failed to load reports. Ensure backend is running.</div>`;
+            grid.innerHTML = `<div class="message error"><i class="fas fa-exclamation-triangle"></i> Failed to load reports.</div>`;
         }
     } catch (error) {
         console.error('Fetch error:', error);
@@ -173,11 +175,13 @@ function renderReports(reports) {
         return;
     }
 
+    const upvotedLocal = JSON.parse(localStorage.getItem("upvoted_reports") || "[]");
+
     reports.forEach(report => {
         const card = document.createElement('div');
         card.className = 'report-card';
+        card.id = `report-card-${report.id}`;
         
-        // Use Image URL or inline SVG placeholder (no external dependency)
         const PLACEHOLDER = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect width='400' height='200' fill='%23e2e8f0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='14' fill='%2394a3b8'%3ENo Image Provided%3C/text%3E%3C/svg%3E`;
         const imageUrl = report.image_url || PLACEHOLDER;
 
@@ -187,28 +191,31 @@ function renderReports(reports) {
         if (report.status === 'In Progress') badgeClass = 'badge-info';
         if (report.status === 'Resolved') badgeClass = 'badge-success';
 
-        // Calculate SLA
-        const slaStatus = window.getSLAStatus(report);
-        const slaText = window.getSLADeadlineText(report);
-        
         let slaHTML = '';
-        if (slaStatus === 'breached') {
-            slaHTML = `<div style="margin-bottom: 1rem;"><span class="badge-sla-breached">⚠ SLA BREACHED</span><div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">${slaText}</div></div>`;
-        } else if (slaStatus === 'due-soon') {
-            slaHTML = `<div style="margin-bottom: 1rem;"><span class="badge-sla-due-soon">⏰ Due Soon</span><div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">${slaText}</div></div>`;
-        } else {
-            slaHTML = `<div style="margin-bottom: 1rem;"><div style="font-size: 0.75rem; color: var(--text-muted);">${slaText}</div></div>`;
+        if (window.getSLAStatus) {
+            const slaStatus = window.getSLAStatus(report);
+            const slaText = window.getSLADeadlineText(report);
+            if (slaStatus === 'breached') {
+                slaHTML = `<div style="margin-bottom: 1rem;"><span class="badge-sla-breached">⚠ SLA BREACHED</span><div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">${slaText}</div></div>`;
+            } else if (slaStatus === 'due-soon') {
+                slaHTML = `<div style="margin-bottom: 1rem;"><span class="badge-sla-due-soon">⏰ Due Soon</span><div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">${slaText}</div></div>`;
+            } else {
+                slaHTML = `<div style="margin-bottom: 1rem;"><div style="font-size: 0.75rem; color: var(--text-muted);">${slaText}</div></div>`;
+            }
         }
 
-        // Build action buttons based on role
         let statusSelectHTML = '';
         let deleteButtonHTML = '';
 
-        // Status update: admin and inspector only
+        const dbUpvotedCount = Array.isArray(report.upvotedBy) ? report.upvotedBy.length : 0;
+        const isUpvoted = upvotedLocal.includes(report.id.toString());
+        const upvoteClass = isUpvoted ? 'voted' : '';
+
+        // Status update: admin and inspector
         if (role === 'admin' || role === 'inspector') {
             statusSelectHTML = `
-                <div class="status-select-wrapper">
-                    <select class="update-status" data-id="${report.id}">
+                <div class="status-select-wrapper" style="margin-left:auto;">
+                    <select class="update-status" data-id="${report.id}" style="padding:4px; border-radius:4px;">
                         <option value="Reported" ${report.status === 'Reported' ? 'selected' : ''}>Reported</option>
                         <option value="In Progress" ${report.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
                         <option value="Resolved" ${report.status === 'Resolved' ? 'selected' : ''}>Resolved</option>
@@ -216,52 +223,54 @@ function renderReports(reports) {
                 </div>
             `;
         } else {
-            // Citizen sees read-only status
             statusSelectHTML = `
-                <div class="status-read-only">
+                <div class="status-read-only" style="margin-left:auto;">
                     <span class="badge ${badgeClass}">${report.status}</span>
                 </div>
             `;
         }
 
-        // Delete: admin only
+        // Delete: admin
         if (role === 'admin') {
             deleteButtonHTML = `
-                <button class="btn-small btn-delete" data-id="${report.id}" title="Delete Report">
-                    <i class="fas fa-trash-alt"></i> Delete
+                <button class="btn-small btn-delete" data-id="${report.id}" title="Delete Report" style="margin-left:8px; padding:4px 8px; cursor:pointer;">
+                    <i class="fas fa-trash-alt"></i>
                 </button>
             `;
         }
 
         card.innerHTML = `
             <div class="report-img-wrapper">
-                <img src="${imageUrl}" alt="Report Image" class="report-img" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'400\\' height=\\'200\\'%3E%3Crect width=\\'400\\' height=\\'200\\' fill=\\'%23fef2f2\\'/%3E%3Ctext x=\\'50%25\\' y=\\'50%25\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' font-family=\\'sans-serif\\' font-size=\\'13\\' fill=\\'%23f87171\\'%3EImage failed to load%3C/text%3E%3C/svg%3E'">
+                <img src="${imageUrl}" alt="Report" class="report-img">
                 <div class="badge-position">
                     <span class="badge ${badgeClass}">${report.status}</span>
                 </div>
             </div>
-            <div class="report-content">
-                <div class="report-title">${escapeHTML(report.title)}</div>
+            <div class="report-content" style="padding:16px;">
+                <div class="report-title" style="font-weight:bold; font-size:1.1rem; margin-bottom:8px;">${escapeHTML(report.title)}</div>
                 
-                <div class="report-meta">
-                    <span class="report-meta-item"><i class="fas fa-map-marker-alt" style="color:var(--secondary)"></i> ${escapeHTML(report.address) || `${report.latitude.toFixed(4)}, ${report.longitude.toFixed(4)}`}</span>
-                    <span class="report-meta-item"><i class="far fa-calendar-alt" style="color:var(--secondary)"></i> ${dateStr}</span>
-                    <span class="report-meta-item"><i class="fas fa-tag" style="color:var(--secondary)"></i> ${escapeHTML(report.category)}</span>
+                <div class="report-meta" style="font-size:0.85rem; color:#666; margin-bottom:12px; display:flex; gap:10px; flex-wrap:wrap;">
+                    <span><i class="fas fa-map-marker-alt"></i> ${escapeHTML(report.address) || 'Location'}</span>
+                    <span><i class="far fa-calendar-alt"></i> ${dateStr}</span>
+                    <span><i class="fas fa-tag"></i> ${escapeHTML(report.category)}</span>
                 </div>
                 
                 ${slaHTML}
 
-                <div class="report-desc">
-                    ${escapeHTML(report.description) || '<i>No additional description provided.</i>'}
+                <div class="report-desc" style="font-size:0.95rem; margin-bottom:12px;">
+                    ${escapeHTML(report.description) || '<i>No description</i>'}
                 </div>
                 
                 ${report.solution ? `
-                <div class="report-solution">
-                    <strong><i class="fas fa-check-circle"></i> Resolution Note</strong>
-                    ${escapeHTML(report.solution)}
+                <div class="report-solution" style="background:#e8f5e9; padding:8px; border-radius:4px; margin-bottom:12px; font-size:0.9rem;">
+                    <strong><i class="fas fa-check-circle"></i> Resolution:</strong> ${escapeHTML(report.solution)}
                 </div>` : ''}
                 
-                <div class="report-actions">
+                <div class="report-actions" style="display:flex; align-items:center; border-top:1px solid #eee; padding-top:12px; margin-top:12px;">
+                    <button class="btn-upvote ${upvoteClass}" data-id="${report.id}">
+                        <i class="fas fa-arrow-up"></i>
+                        <span id="upvote-count-${report.id}">${dbUpvotedCount}</span>
+                    </button>
                     ${statusSelectHTML}
                     ${deleteButtonHTML}
                 </div>
@@ -270,12 +279,11 @@ function renderReports(reports) {
         grid.appendChild(card);
     });
 
-    // Add event listeners to status selects (admin + inspector only)
+    // Event listeners
     document.querySelectorAll('.update-status').forEach(select => {
         select.addEventListener('change', async (e) => {
             const reportId = e.target.getAttribute('data-id');
             const newStatus = e.target.value;
-            
             let solution = undefined;
             if (newStatus === 'Resolved') {
                 solution = prompt('Please describe how this issue was resolved (or leave blank):');
@@ -284,64 +292,97 @@ function renderReports(reports) {
                     return;
                 }
             }
-
             e.target.disabled = true;
             await updateStatus(reportId, newStatus, solution);
-            fetchReports();
         });
     });
 
-    // Add event listeners to delete buttons (admin only)
     document.querySelectorAll('.btn-delete').forEach(btn => {
         btn.addEventListener('click', async (e) => {
             const targetBtn = e.target.closest('button');
             const reportId = targetBtn.getAttribute('data-id');
-            if (confirm('Are you sure you want to permanently delete this report?')) {
+            if (confirm('Permanently delete this report?')) {
                 const card = targetBtn.closest('.report-card');
                 card.style.opacity = '0.5';
                 await deleteReport(reportId);
-                fetchReports();
-                fetchStats();
             }
+        });
+    });
+
+    // Upvote
+    document.querySelectorAll('.btn-upvote').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const targetBtn = e.target.closest('button');
+            const reportId = targetBtn.getAttribute('data-id');
+            await handleUpvote(reportId, targetBtn);
         });
     });
 }
 
+async function handleUpvote(id, btnElement) {
+    let upvotedLocal = JSON.parse(localStorage.getItem("upvoted_reports") || "[]");
+    
+    if (upvotedLocal.includes(id.toString())) {
+        if (window.showToast) window.showToast("Already upvoted!", "warning");
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_URL}/${id}/upvote`, {
+            method: 'PATCH',
+            headers: { 'x-user-id': getUserId() }
+        });
+        
+        if (!response.ok) {
+            if (window.showToast) window.showToast('Failed to upvote report.', 'error');
+            return;
+        }
+
+        const data = await response.json();
+        
+        upvotedLocal.push(id.toString());
+        localStorage.setItem("upvoted_reports", JSON.stringify(upvotedLocal));
+
+        btnElement.classList.add('voted');
+        if (window.showToast) window.showToast("✅ Upvoted!", "success");
+
+        const countSpan = document.getElementById(`upvote-count-${id}`);
+        if (countSpan) countSpan.textContent = data.upvotes;
+        
+    } catch (err) {
+        if (window.showToast) window.showToast('Network error while upvoting.', 'error');
+    }
+}
+
 async function deleteReport(id) {
-    const role = getUserRole();
     try {
         const response = await fetch(`${API_URL}/${id}`, {
             method: 'DELETE',
             headers: {
-                'x-user-role': role,
+                'x-user-role': getUserRole(),
                 'x-user-id': getUserId(),
                 'x-user-name': getUserName()
             }
         });
         if (!response.ok) {
             const data = await response.json();
-            showToast(data.error || 'Failed to delete report. Please try again.', 'error');
-        } else {
-            showToast('Report permanently deleted.', 'info');
+            if (window.showToast) window.showToast(data.error || 'Failed to delete report.', 'error');
         }
     } catch (err) {
-        showToast('Network error while deleting report.', 'error');
+        if (window.showToast) window.showToast('Network error while deleting.', 'error');
     }
 }
 
 async function updateStatus(id, newStatus, solution) {
-    const role = getUserRole();
     try {
         const payload = { status: newStatus };
-        if (solution !== undefined) {
-            payload.solution = solution;
-        }
+        if (solution !== undefined) payload.solution = solution;
 
         const response = await fetch(`${API_URL}/${id}/status`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
-                'x-user-role': role,
+                'x-user-role': getUserRole(),
                 'x-user-id': getUserId(),
                 'x-user-name': getUserName()
             },
@@ -349,102 +390,50 @@ async function updateStatus(id, newStatus, solution) {
         });
         if (!response.ok) {
             const data = await response.json();
-            showToast(data.error || 'Failed to update status. Please try again.', 'error');
-        } else {
-            showToast('Status updated successfully.', 'success');
-            fetchStats();
+            if (window.showToast) window.showToast(data.error || 'Failed to update.', 'error');
         }
     } catch (err) {
-        showToast('Network error while updating status.', 'error');
+        if (window.showToast) window.showToast('Network error while updating.', 'error');
     }
 }
 
-// Basic HTML escaper
-function escapeHTML(str) {
-    if (!str) return str;
-    return str.replace(/[&<>'"]/g, 
-        tag => ({
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            "'": '&#39;',
-            '"': '&quot;'
-        }[tag])
-    );
-}
-
-// Toast Utility
-function showToast(message, type = 'success') {
-    const container = document.getElementById('toast-container');
-    if (!container) return;
-    
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    
-    let icon = 'info-circle';
-    if (type === 'success') icon = 'check-circle';
-    if (type === 'error') icon = 'exclamation-circle';
-    if (type === 'warning') icon = 'exclamation-triangle';
-    
-    toast.innerHTML = `<i class="fas fa-${icon}"></i> <span>${message}</span>`;
-    container.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.classList.add('hiding');
-        setTimeout(() => toast.remove(), 300);
-    }, 4000);
-}
-
-// Fetch Stats
 async function fetchStats() {
     try {
         const response = await fetch(`${API_URL}/stats`);
         const data = await response.json();
-        const statsContainer = document.getElementById('statsContainer');
-        if (!statsContainer) return;
-        
-        let total = 0, reported = 0, progress = 0, resolved = 0;
-        
-        if (response.ok && data.data) {
-            data.data.forEach(stat => {
-                total += stat.count;
-                if (stat.status === 'Reported') reported = stat.count;
-                if (stat.status === 'In Progress') progress = stat.count;
-                if (stat.status === 'Resolved') resolved = stat.count;
-            });
+        if (response.ok) {
+            renderStats(data.data || []);
         }
-        
-        statsContainer.innerHTML = `
-            <div class="stat-card">
-                <div class="stat-icon total"><i class="fas fa-list-alt"></i></div>
-                <div class="stat-details">
-                    <h3>${total}</h3>
-                    <p>Total Issues</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon reported"><i class="fas fa-bullhorn"></i></div>
-                <div class="stat-details">
-                    <h3>${reported}</h3>
-                    <p>Newly Reported</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon progress"><i class="fas fa-tools"></i></div>
-                <div class="stat-details">
-                    <h3>${progress}</h3>
-                    <p>In Progress</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon resolved"><i class="fas fa-check"></i></div>
-                <div class="stat-details">
-                    <h3>${resolved}</h3>
-                    <p>Resolved</p>
-                </div>
-            </div>
-        `;
-    } catch (e) {
-        console.error('Stats error:', e);
+    } catch (error) {
+        console.error('Stats error:', error);
     }
+}
+
+function renderStats(statsArray) {
+    const container = document.getElementById('statsContainer');
+    if (!container) return;
+
+    const statsMap = statsArray.reduce((acc, curr) => {
+        acc[curr.status] = curr.count;
+        return acc;
+    }, {});
+
+    const total = statsArray.reduce((sum, curr) => sum + curr.count, 0);
+    const resolved = statsMap['Resolved'] || 0;
+    const reported = statsMap['Reported'] || 0;
+
+    container.innerHTML = `
+        <div class="stat-card">
+            <div class="stat-value">${total}</div>
+            <div class="stat-label">Total Reports</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" style="color: var(--success);">${resolved}</div>
+            <div class="stat-label">Issues Resolved</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" style="color: var(--warning);">${reported}</div>
+            <div class="stat-label">Needs Attention</div>
+        </div>
+    `;
 }
