@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ — RoadFix</title>
+    <meta name="description" content="Frequently asked questions about using RoadFix to report and track road issues.">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="js/theme.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <style>
+        .faq-item { border:1px solid var(--border); border-radius:var(--radius-md); margin-bottom:1rem; overflow:hidden; }
+        .faq-question { width:100%; background:none; border:none; padding:1.25rem 1.5rem; text-align:left; font-family:'Outfit',sans-serif; font-size:1rem; font-weight:700; color:var(--text-primary); cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:1rem; transition:var(--transition); }
+        .faq-question:hover { background:var(--info-bg); }
+        .faq-question i { color:var(--primary); transition:transform .3s ease; flex-shrink:0; }
+        .faq-question.open i { transform:rotate(45deg); }
+        .faq-answer { padding:0 1.5rem; max-height:0; overflow:hidden; transition:max-height .35s ease, padding .35s ease; color:var(--text-secondary); line-height:1.7; font-size:.97rem; }
+        .faq-answer.open { max-height:300px; padding:0 1.5rem 1.25rem; }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="container nav-container">
+        <a href="index.html" class="logo"><i class="fas fa-road"></i> RoadFix</a>
+        <div class="nav-right">
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="report.html">Report Issue</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="faq.html" class="active">FAQ</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+            <div class="nav-user-info" id="navUserInfo"></div>
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Theme">
+                <i class="fas fa-moon" id="theme-icon"></i>
+            </button>
+        </div>
+    </div>
+</nav>
+<script>
+(function(){
+    const role=localStorage.getItem('userRole'),name=localStorage.getItem('userName');
+    if(!role){window.location.href='login.html';return;}
+    const info=document.getElementById('navUserInfo');
+    if(info){info.innerHTML=`<span class="role-badge role-${role}">${role.charAt(0).toUpperCase()+role.slice(1)}</span><button class="btn-logout" onclick="handleLogout()" title="Logout"><i class="fas fa-sign-out-alt"></i></button>`;}
+    window.handleLogout=async function(){try{await fetch('/api/auth/logout',{method:'POST',headers:{'x-user-role':role,'x-user-name':name||''}});}catch(e){}localStorage.clear();window.location.href='login.html';};
+})();
+</script>
+
+<div class="hero">
+    <div class="container">
+        <h1>Frequently Asked <span>Questions</span></h1>
+        <p>Everything you need to know about reporting and tracking road issues.</p>
+    </div>
+</div>
+
+<main class="container" style="max-width:780px;padding-bottom:5rem;">
+
+    <div id="faqList"></div>
+
+    <div style="text-align:center;margin-top:3rem;">
+        <p style="color:var(--text-muted);margin-bottom:1rem;">Still have questions?</p>
+        <a href="contact.html" class="home-btn-primary" style="display:inline-flex;">
+            <i class="fas fa-envelope"></i> Contact Us
+        </a>
+    </div>
+</main>
+
+<script>
+const faqs = [
+    { q: "How do I report a road issue?", a: "Click 'Report Issue' in the navbar, fill in the title and category, pin the location on the map, optionally add a photo and description, then click Submit." },
+    { q: "Do I need an account to report?", a: "Yes — you need to log in with a Citizen, Inspector, or Admin account to submit reports. This ensures accountability and prevents spam." },
+    { q: "How long does it take to fix an issue?", a: "Response times vary by severity and location. You can track the status of your report in real time on the Dashboard — it will move from Reported → In Progress → Resolved." },
+    { q: "What types of issues can I report?", a: "You can report Potholes, Blocked Drains, Streetlight Issues, Faded Road Signs, or any other road-related problem under 'Other'." },
+    { q: "Can I upvote reports made by others?", a: "Yes! Each logged-in user can upvote any report once. More upvotes help prioritize high-impact issues for the maintenance team." },
+    { q: "What is SLA and what happens when it's breached?", a: "SLA (Service Level Agreement) is a target resolution time. Reports nearing their deadline show a 'Due Soon' badge; those past the deadline show 'SLA Breached' in red." },
+    { q: "What is the Audit Log?", a: "The Audit Log is an admin-only page that records every significant action: logins, logouts, report creations, status changes, and deletions." },
+    { q: "Can inspectors delete reports?", a: "No. Only Admins can delete reports. Inspectors can change report statuses but cannot delete them." }
+];
+
+const list = document.getElementById('faqList');
+faqs.forEach((item, i) => {
+    list.innerHTML += `
+        <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(${i})" id="faq-btn-${i}" aria-expanded="false">
+                ${item.q} <i class="fas fa-plus"></i>
+            </button>
+            <div class="faq-answer" id="faq-ans-${i}">${item.a}</div>
+        </div>`;
+});
+
+function toggleFaq(i) {
+    const btn = document.getElementById(`faq-btn-${i}`);
+    const ans = document.getElementById(`faq-ans-${i}`);
+    const isOpen = ans.classList.contains('open');
+    document.querySelectorAll('.faq-answer.open').forEach(a => a.classList.remove('open'));
+    document.querySelectorAll('.faq-question.open').forEach(b => b.classList.remove('open'));
+    if (!isOpen) { ans.classList.add('open'); btn.classList.add('open'); btn.setAttribute('aria-expanded','true'); }
+}
+</script>
+</body>
+</html>
