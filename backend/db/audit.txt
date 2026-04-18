@@ -1,5 +1,113 @@
 [
   {
+    "id": "86f27be1-392c-4d15-a539-b078c949a439",
+    "timestamp": "2026-04-18T11:10:51.943Z",
+    "action": "report.status_changed",
+    "actor": {
+      "id": "user1",
+      "name": "Admin User",
+      "role": "admin"
+    },
+    "reportId": "5",
+    "details": "Status changed from Reported to Resolved for report #5"
+  },
+  {
+    "id": "ee5bf645-e5f8-47a9-b4d8-887463b8bf72",
+    "timestamp": "2026-04-18T11:10:36.835Z",
+    "action": "report.status_changed",
+    "actor": {
+      "id": "user1",
+      "name": "Admin User",
+      "role": "admin"
+    },
+    "reportId": "9",
+    "details": "Status changed from Reported to In Progress for report #9"
+  },
+  {
+    "id": "9865ea89-267f-4e26-8e28-cef103eabd60",
+    "timestamp": "2026-04-18T11:09:10.624Z",
+    "action": "report.status_changed",
+    "actor": {
+      "id": "user_001",
+      "name": "Unknown User",
+      "role": "admin"
+    },
+    "reportId": "1",
+    "details": "Status changed from Reported to In Progress for report #1"
+  },
+  {
+    "id": "f7001b76-14bc-4bf9-9ce1-7013a2f33ff4",
+    "timestamp": "2026-04-18T11:07:04.292Z",
+    "action": "report.deleted",
+    "actor": {
+      "id": "user1",
+      "name": "Admin User",
+      "role": "admin"
+    },
+    "reportId": "6",
+    "details": "Report #6 permanently deleted"
+  },
+  {
+    "id": "fbeff81d-f22c-470a-8be3-1a0775eb7138",
+    "timestamp": "2026-04-18T11:05:46.311Z",
+    "action": "report.status_changed",
+    "actor": {
+      "id": "user1",
+      "name": "Admin User",
+      "role": "admin"
+    },
+    "reportId": "3",
+    "details": "Status changed from Reported to Resolved for report #3"
+  },
+  {
+    "id": "ec05aa03-5419-4e03-bff6-0f5f70579a92",
+    "timestamp": "2026-04-18T10:58:07.974Z",
+    "action": "report.created",
+    "actor": {
+      "id": "user1",
+      "name": "Admin User",
+      "role": "admin"
+    },
+    "reportId": "9",
+    "details": "Report #9 titled 'pothole' submitted in category Pothole"
+  },
+  {
+    "id": "cc1992f4-5f79-48af-9da7-1551b6744557",
+    "timestamp": "2026-04-18T10:57:07.681Z",
+    "action": "report.created",
+    "actor": {
+      "id": "user1",
+      "name": "Admin User",
+      "role": "admin"
+    },
+    "reportId": "8",
+    "details": "Report #8 titled 'pothole' submitted in category Streetlight Issue"
+  },
+  {
+    "id": "6d116d3f-2bd2-42eb-bbcf-57623703fe79",
+    "timestamp": "2026-04-18T08:21:22.803Z",
+    "action": "user.login",
+    "actor": {
+      "id": 1,
+      "name": "Alice",
+      "role": "admin"
+    },
+    "reportId": null,
+    "details": "User Alice logged into the system"
+  },
+  {
+    "id": "b375467e-4611-4783-8851-32e9fce02ad1",
+    "timestamp": "2026-04-16T10:15:30.486Z",
+    "action": "user.login",
+    "actor": {
+      "id": 1,
+      "name": "Alice",
+      "role": "admin"
+    },
+    "reportId": null,
+    "details": "User Alice logged into the system"
+  },
+  {
     "id": "9886b79d-6347-4a68-b801-2c629971b017",
     "timestamp": "2026-04-16T10:15:21.459Z",
     "action": "user.logout",
@@ -264,15 +372,15 @@
     "details": "User Priya logged out"
   },
   {
-    "id": "b375467e-4611-4783-8851-32e9fce02ad1",
-    "timestamp": "2026-04-16T10:15:30.486Z",
-    "action": "user.login",
+    "id": "32161ccf-a029-4e84-b0fa-a3a6e0fb6cd4",
+    "timestamp": "2026-04-18T11:10:59.303Z",
+    "action": "report.deleted",
     "actor": {
-      "id": 1,
-      "name": "Alice",
+      "id": "user1",
+      "name": "Admin User",
       "role": "admin"
     },
-    "reportId": null,
-    "details": "User Alice logged into the system"
+    "reportId": "3",
+    "details": "Report #3 permanently deleted"
   }
 ]

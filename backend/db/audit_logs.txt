@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "timestamp": "2026-04-18T07:40:10.456Z",
+    "action": "user.logout",
+    "actor": {
+      "id": "user_003",
+      "name": "Priya",
+      "role": "citizen"
+    },
+    "reportId": null,
+    "details": "User Priya logged out"
+  },
+  {
+    "id": 2,
+    "timestamp": "2026-04-18T07:40:44.072Z",
+    "action": "user.logout",
+    "actor": {
+      "id": "unknown",
+      "name": "Priya",
+      "role": "citizen"
+    },
+    "reportId": null,
+    "details": "User Priya logged out"
+  }
+]

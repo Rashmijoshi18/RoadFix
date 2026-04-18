@@ -1,57 +1,53 @@
 const express = require('express');
+const router = express.Router();
 const fs = require('fs');
 const path = require('path');
-const router = express.Router();
 
-const messagesPath = path.join(__dirname, '..', 'db', 'contact_messages.txt');
+const MESSAGES_FILE = path.join(__dirname, '../db/contact_messages.txt');
 
-if (!fs.existsSync(messagesPath)) {
-    fs.writeFileSync(messagesPath, JSON.stringify([]), 'utf-8');
+if (!fs.existsSync(path.dirname(MESSAGES_FILE))) {
+    fs.mkdirSync(path.dirname(MESSAGES_FILE), { recursive: true });
+}
+if (!fs.existsSync(MESSAGES_FILE)) {
+    fs.writeFileSync(MESSAGES_FILE, '[]');
 }
 
-function sanitize(str) {
-    if (typeof str !== 'string') return '';
-    return str.trim().replace(/[<>]/g, '');
-}
-
-/**
- * POST /api/contact
- */
 router.post('/', (req, res) => {
     try {
-        const name    = sanitize(req.body.name    || '');
-        const email   = sanitize(req.body.email   || '');
-        const subject = sanitize(req.body.subject || '');
-        const message = sanitize(req.body.message || '');
-
-        if (!name || !email || !subject || !message) {
-            return res.status(400).json({ success: false, data: null, error: 'All fields are required.' });
+        const { name, email, subject, message } = req.body;
+        if(!name || !email || !subject || !message) {
+            return res.status(400).json({ success: false, error: 'All fields are required.' });
         }
-
+        
+        // Email formatting validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            return res.status(400).json({ success: false, data: null, error: 'Please provide a valid email address.' });
+        if(!emailRegex.test(email)) {
+            return res.status(400).json({ success: false, error: 'Please enter a valid email address.' });
         }
 
+        if(message.length < 20) {
+            return res.status(400).json({ success: false, error: 'Message must be at least 20 characters.' });
+        }
+
+        const raw = fs.readFileSync(MESSAGES_FILE, 'utf8');
         let messages = [];
-        try {
-            const raw = fs.readFileSync(messagesPath, 'utf-8');
-            messages = raw ? JSON.parse(raw) : [];
-            if (!Array.isArray(messages)) messages = [];
-        } catch (e) { messages = []; }
+        try { messages = JSON.parse(raw); } catch(e) { messages = []; }
 
-        const newMsg = {
-            id: messages.length > 0 ? Math.max(...messages.map(m => m.id || 0)) + 1 : 1,
-            name, email, subject, message,
-            receivedAt: new Date().toISOString()
+        const newMessage = {
+            id: Date.now().toString(),
+            name,
+            email,
+            subject,
+            message,
+            timestamp: new Date().toISOString()
         };
-        messages.push(newMsg);
-        fs.writeFileSync(messagesPath, JSON.stringify(messages, null, 2), 'utf-8');
 
-        return res.status(201).json({ success: true, data: { id: newMsg.id }, error: null });
-    } catch (err) {
-        console.error('Contact error:', err.message);
-        return res.status(500).json({ success: false, data: null, error: 'An unexpected error occurred.' });
+        messages.push(newMessage);
+        fs.writeFileSync(MESSAGES_FILE, JSON.stringify(messages, null, 2));
+
+        res.json({ success: true, data: { message: 'Sent!' } });
+    } catch(err) {
+        res.status(500).json({ success: false, error: err.message });
     }
 });
 
