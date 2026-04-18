@@ -90,16 +90,15 @@ const db = {
             callback.call({ lastID: newId }, null);
         } else if (query.includes('UPDATE')) {
             const id = params[params.length - 1];
-            const index = records.findIndex(r => r.id == id);
+            const index = records.findIndex(r => r.id.toString() === id.toString());
             if (index !== -1) {
-                // Parsing column names from query: "UPDATE reports SET col1 = ?, col2 = ? WHERE id = ?"
-                const setClause = query.split('SET')[1].split('WHERE')[0];
+                const setClause = query.split(/SET/i)[1].split(/WHERE/i)[0];
                 const columns = setClause.split(',').map(c => c.trim().split('=')[0].trim());
                 
                 columns.forEach((col, idx) => {
                     let val = params[idx];
                     if (col === 'upvotedBy' && typeof val === 'string') {
-                        try { val = JSON.parse(val); } catch(e) {}
+                        try { val = JSON.parse(val); } catch(e) { val = []; }
                     }
                     records[index][col] = val;
                 });

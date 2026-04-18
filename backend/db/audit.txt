@@ -1,5 +1,17 @@
 [
   {
+    "id": "32161ccf-a029-4e84-b0fa-a3a6e0fb6cd4",
+    "timestamp": "2026-04-18T11:10:59.303Z",
+    "action": "report.deleted",
+    "actor": {
+      "id": "user1",
+      "name": "Admin User",
+      "role": "admin"
+    },
+    "reportId": "3",
+    "details": "Report #3 permanently deleted"
+  },
+  {
     "id": "86f27be1-392c-4d15-a539-b078c949a439",
     "timestamp": "2026-04-18T11:10:51.943Z",
     "action": "report.status_changed",
@@ -372,15 +384,15 @@
     "details": "User Priya logged out"
   },
   {
-    "id": "32161ccf-a029-4e84-b0fa-a3a6e0fb6cd4",
-    "timestamp": "2026-04-18T11:10:59.303Z",
+    "id": "c191dfcd-b80f-47bb-8112-3c2758c921dd",
+    "timestamp": "2026-04-18T14:49:32.546Z",
     "action": "report.deleted",
     "actor": {
       "id": "user1",
       "name": "Admin User",
       "role": "admin"
     },
-    "reportId": "3",
-    "details": "Report #3 permanently deleted"
+    "reportId": "1",
+    "details": "Report #1 permanently deleted"
   }
 ]
