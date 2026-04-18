@@ -6,7 +6,8 @@
     <title>RoadFix - Citizen Feedback</title>
     <!-- Outfit Font -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="js/theme.js"></script>
+    <script src="js/theme.js" defer></script>
+    <script src="js/main.js" defer></script>
     <link rel="stylesheet" href="css/style.css">
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -25,6 +26,9 @@
                     <li><a href="faq.html">FAQ</a></li>
                     <li><a href="contact.html">Contact</a></li>
                 </ul>
+                <button id="mobile-toggle" class="mobile-menu-btn" aria-label="Toggle Menu">
+                    <i class="fas fa-bars"></i>
+                </button>
                 <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Theme">
                     <i class="fas fa-moon" id="theme-icon"></i>
                 </button>
