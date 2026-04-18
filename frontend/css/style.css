@@ -271,7 +271,6 @@ body::before {
     }
     .form-container { padding: 2rem; }
     .hero h1 { font-size: 2.5rem; }
-    .nav-links { display: none; } /* Simple responsive fallback */
     .dashboard-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
 }
 
@@ -1232,6 +1231,20 @@ input:focus, select:focus, textarea:focus {
     animation: fadeInUp 0.8s ease-out;
 }
 
+@media (max-width: 992px) {
+    .landing-hero h1 { font-size: 4rem; }
+}
+
+@media (max-width: 768px) {
+    .landing-hero { padding: 7rem 1rem 5rem; }
+    .landing-hero h1 { font-size: 3rem; letter-spacing: -1.5px; }
+    .landing-hero p { font-size: 1.25rem; margin-bottom: 2.5rem; }
+}
+
+@media (max-width: 480px) {
+    .landing-hero h1 { font-size: 2.5rem; }
+}
+
 .landing-hero p {
     font-size: 1.5rem;
     max-width: 800px;
@@ -1325,6 +1338,20 @@ input:focus, select:focus, textarea:focus {
     margin-left: auto;
     margin-right: auto;
     box-shadow: var(--shadow-xl);
+}
+
+@media (max-width: 992px) {
+    .hero-stats { gap: 2rem; padding: 2.5rem; }
+}
+
+@media (max-width: 768px) {
+    .hero-stats { 
+        flex-direction: column; 
+        gap: 2.5rem; 
+        padding: 2rem;
+        margin-top: 4rem;
+    }
+    .hero-stat-item h3 { font-size: 2.5rem; }
 }
 
 .hero-stat-item {
@@ -1508,10 +1535,148 @@ input:focus, select:focus, textarea:focus {
     pointer-events: none;
 }
 
+/* ==========================================================================
+   ENHANCED RESPONSIVENESS & MOBILE MENU
+   =================================== */
+
+/* Mobile Menu Button */
+.mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: var(--transition);
+    width: 2.5rem;
+    height: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+}
+
+.mobile-menu-btn:hover {
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--primary);
+}
+
+@media (max-width: 992px) {
+    .nav-right {
+        gap: 1.5rem;
+    }
+}
+
 @media (max-width: 768px) {
-    .landing-hero h1 { font-size: 3.5rem; }
-    .landing-hero p { font-size: 1.15rem; }
-    .hero-stats { flex-direction: column; gap: 3rem; padding: 2rem; }
-    .cta-banner { padding: 4rem 2rem; }
+    .mobile-menu-btn {
+        display: flex;
+    }
+
+    .nav-links {
+        position: fixed;
+        top: 5rem;
+        left: 0;
+        width: 100%;
+        max-height: 0;
+        background: var(--nav-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        flex-direction: column;
+        align-items: center;
+        overflow: hidden;
+        transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s ease;
+        padding: 0;
+        z-index: 999;
+        border-bottom: 0px solid var(--border);
+        display: flex; /* Ensure it's flex, not none from elsewhere */
+    }
+
+    .nav-links.active {
+        max-height: 100vh;
+        padding: 2.5rem 0;
+        border-bottom-width: 1px;
+    }
+
+    .nav-links li {
+        width: 100%;
+        text-align: center;
+    }
+
+    .nav-links a {
+        display: block;
+        padding: 1rem;
+        font-size: 1.25rem;
+    }
+
+    /* Process Steps Stacking */
+    .process-container {
+        flex-direction: column;
+        gap: 3rem;
+    }
+
+    .step-connector {
+        display: none;
+    }
+
+    .process-step {
+        width: 100%;
+    }
+
+    /* Dashboard & Grid Adjustments */
+    .reports-grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .dashboard-header h1 {
+        font-size: 2.5rem;
+    }
+
+    .filters-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-group select {
+        width: 100%;
+    }
+
+    /* Container Adjustments */
+    .container {
+        padding: 0 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .landing-hero h1 {
+        font-size: 2.75rem;
+    }
+
+    .landing-hero p {
+        font-size: 1.1rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .hero-stat-item h3 {
+        font-size: 2.5rem;
+    }
+
+    .hero-btns {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .hero-btns a {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .form-container {
+        padding: 1.5rem;
+        margin-top: 0;
+    }
+
+    .report-card {
+        max-width: 100%;
+    }
 }
 
