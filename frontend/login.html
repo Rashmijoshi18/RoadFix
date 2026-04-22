@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - RoadFix</title>
+    <meta name="description" content="Sign in to RoadFix to report road issues, manage inspections, or access the admin dashboard.">
+    <!-- Outfit Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="js/theme.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="login.html" class="logo"><i class="fas fa-road"></i> RoadFix</a>
+            <div class="nav-right">
+                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Theme">
+                    <i class="fas fa-moon" id="theme-icon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="login-page">
+        <div class="login-wrapper">
+            <!-- Login Card -->
+            <div class="login-card">
+                <div class="login-header">
+                    <div class="login-icon-circle">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h1>Welcome Back</h1>
+                    <p>Sign in to your RoadFix account</p>
+                </div>
+
+                <form id="loginForm" autocomplete="off">
+                    <div class="form-group">
+                        <label for="loginEmail"><i class="fas fa-envelope"></i> Email Address</label>
+                        <input type="email" id="loginEmail" name="email" required
+                               placeholder="you@roadfix.com" autocomplete="email">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="loginPassword"><i class="fas fa-lock"></i> Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="loginPassword" name="password" required
+                                   placeholder="Enter your password" autocomplete="current-password">
+                            <button type="button" class="password-toggle-btn" id="passwordToggleBtn" aria-label="Toggle password visibility">
+                                <i class="fas fa-eye" id="passwordToggleIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="loginError" class="login-error hidden"></div>
+
+                    <button type="submit" class="btn btn-primary" id="loginSubmitBtn">
+                        <i class="fas fa-sign-in-alt"></i> Sign In
+                    </button>
+                </form>
+            </div>
+
+            <!-- Demo Credentials Card -->
+            <div class="demo-credentials-card">
+                <div class="demo-credentials-header">
+                    <i class="fas fa-flask"></i>
+                    <h3>Demo Credentials</h3>
+                    <p>Click any card to auto-fill login</p>
+                </div>
+
+                <div class="demo-users-list">
+                    <button type="button" class="demo-user-item" data-email="admin@roadfix.com" data-password="admin123">
+                        <div class="demo-user-avatar admin-avatar">
+                            <i class="fas fa-crown"></i>
+                        </div>
+                        <div class="demo-user-info">
+                            <span class="demo-user-name">Alice</span>
+                            <span class="demo-user-email">admin@roadfix.com</span>
+                        </div>
+                        <span class="role-badge role-admin">Admin</span>
+                    </button>
+
+                    <button type="button" class="demo-user-item" data-email="inspector@roadfix.com" data-password="inspect123">
+                        <div class="demo-user-avatar inspector-avatar">
+                            <i class="fas fa-hard-hat"></i>
+                        </div>
+                        <div class="demo-user-info">
+                            <span class="demo-user-name">Raj Kumar</span>
+                            <span class="demo-user-email">inspector@roadfix.com</span>
+                        </div>
+                        <span class="role-badge role-inspector">Inspector</span>
+                    </button>
+
+                    <button type="button" class="demo-user-item" data-email="citizen@roadfix.com" data-password="citizen123">
+                        <div class="demo-user-avatar citizen-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="demo-user-info">
+                            <span class="demo-user-name">Priya</span>
+                            <span class="demo-user-email">citizen@roadfix.com</span>
+                        </div>
+                        <span class="role-badge role-citizen">Citizen</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script>
+        // ---- Password toggle ----
+        const passwordToggleBtn = document.getElementById('passwordToggleBtn');
+        const passwordInput = document.getElementById('loginPassword');
+        const passwordToggleIcon = document.getElementById('passwordToggleIcon');
+
+        passwordToggleBtn.addEventListener('click', () => {
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            passwordToggleIcon.classList.toggle('fa-eye', !isPassword);
+            passwordToggleIcon.classList.toggle('fa-eye-slash', isPassword);
+        });
+
+        // ---- Demo user auto-fill ----
+        document.querySelectorAll('.demo-user-item').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('loginEmail').value = btn.dataset.email;
+                document.getElementById('loginPassword').value = btn.dataset.password;
+
+                // Visual feedback
+                document.querySelectorAll('.demo-user-item').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+            });
+        });
+
+        // ---- Form submission ----
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            const errorBox = document.getElementById('loginError');
+            const submitBtn = document.getElementById('loginSubmitBtn');
+
+            // Reset error
+            errorBox.classList.add('hidden');
+            errorBox.textContent = '';
+
+            if (!email || !password) {
+                errorBox.textContent = 'Please enter both email and password.';
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            // Disable button
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    // Store user info in localStorage
+                    localStorage.setItem('userRole', result.data.user.role);
+                    localStorage.setItem('userName', result.data.user.name);
+                    localStorage.setItem('userId', result.data.user.id);
+
+                    // Redirect to main page
+                    window.location.href = 'index.html';
+                } else {
+                    errorBox.textContent = result.error || 'Invalid credentials. Please try again.';
+                    errorBox.classList.remove('hidden');
+                }
+            } catch (err) {
+                errorBox.textContent = 'Network error. Please ensure the server is running.';
+                errorBox.classList.remove('hidden');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In';
+            }
+        });
+
+        // ---- If already logged in, redirect ----
+        if (localStorage.getItem('userRole')) {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

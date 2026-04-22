@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "name": "Alice",
+    "email": "admin@roadfix.com",
+    "password": "admin123",
+    "role": "admin"
+  },
+  {
+    "id": 2,
+    "name": "Raj Kumar",
+    "email": "inspector@roadfix.com",
+    "password": "inspect123",
+    "role": "inspector"
+  },
+  {
+    "id": 3,
+    "name": "Priya",
+    "email": "citizen@roadfix.com",
+    "password": "citizen123",
+    "role": "citizen"
+  }
+]

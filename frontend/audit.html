@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Trail - RoadFix</title>
+    <!-- Outfit Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="js/theme.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        .timeline {
+            position: relative;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding-left: 2rem;
+            border-left: 3px solid var(--border);
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+        .timeline-icon {
+            position: absolute;
+            left: -3rem; /* 2rem padding + 1rem radius */
+            top: 1rem;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.9rem;
+            box-shadow: 0 0 0 4px var(--bg-main);
+        }
+        /* Icon color coding per action type */
+        .icon-report-created { background-color: var(--success); }
+        .icon-report-status_changed { background-color: var(--info); }
+        .icon-report-deleted { background-color: var(--danger); }
+        .icon-user-login { background-color: var(--text-muted); }
+        .icon-user-logout { background-color: var(--text-muted); }
+        
+        .timeline-time {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+        .timeline-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+            flex-wrap: wrap;
+        }
+        .timeline-actor {
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .timeline-details {
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+        
+        .access-denied-card {
+            text-align: center;
+            padding: 5rem 2rem;
+            background: var(--bg-card);
+            border: 1px solid var(--danger);
+            border-radius: var(--radius-lg);
+            margin: 4rem auto;
+            max-width: 600px;
+        }
+        .access-denied-card h2 {
+            color: var(--danger);
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo"><i class="fas fa-road"></i> RoadFix</a>
+            <div class="nav-right">
+                <ul class="nav-links">
+                    <li><a href="index.html">Report Issue</a></li>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li id="auditNavLink"><a href="audit.html" class="active">Audit Log</a></li>
+                </ul>
+                <div class="nav-user-info" id="navUserInfo"></div>
+                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Theme">
+                    <i class="fas fa-moon" id="theme-icon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Auth guard + nav user display -->
+    <script>
+        (function() {
+            const role = localStorage.getItem('userRole');
+            const name = localStorage.getItem('userName');
+            
+            // Basic guard: must be logged in
+            if (!role) { window.location.href = 'login.html'; return; }
+            
+            const info = document.getElementById('navUserInfo');
+            if (info) {
+                info.innerHTML = `
+                    <span class="role-badge role-${role}">${role.charAt(0).toUpperCase() + role.slice(1)}</span>
+                    <button class="btn-logout" onclick="handleLogout()" title="Logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                `;
+            }
+
+            window.handleLogout = async function() {
+                try {
+                    await fetch('/api/auth/logout', {
+                        method: 'POST',
+                        headers: {
+                            'x-user-role': role || 'unknown',
+                            'x-user-id': localStorage.getItem('userId') || 'unknown',
+                            'x-user-name': name || 'Unknown'
+                        }
+                    });
+                } catch(e) { console.error('Logout error:', e); }
+                localStorage.clear();
+                window.location.href = 'login.html';
+            };
+        })();
+    </script>
+
+    <main class="container" id="mainContent">
+        <!-- Will be populated by JS: either Access Denied or Timeline -->
+    </main>
+
+    <script src="js/audit.js"></script>
+</body>
+</html>

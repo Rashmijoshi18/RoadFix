@@ -3,82 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About RoadFix - Citizen Empowerment</title>
+    <title>About — RoadFix</title>
+    <meta name="description" content="Learn about RoadFix — the civic reporting platform bridging citizens and maintenance crews.">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="js/theme.js" defer></script>
-    <script src="js/main.js" defer></script>
+    <script src="js/theme.js"></script>
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="container nav-container">
-            <a href="index.html" class="logo"><i class="fas fa-road"></i> RoadFix</a>
-            <div class="nav-right">
-                <ul class="nav-links">
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="about.html" class="active">About</a></li>
-                    <li><a href="report.html">Report Issue</a></li>
-                    <li><a href="dashboard.html">Dashboard</a></li>
-                    <li><a href="faq.html">FAQ</a></li>
-                    <li><a href="contact.html">Contact</a></li>
-                </ul>
-                <button id="mobile-toggle" class="mobile-menu-btn" aria-label="Toggle Menu">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Theme">
-                    <i class="fas fa-moon" id="theme-icon"></i>
-                </button>
-            </div>
+<nav class="navbar">
+    <div class="container nav-container">
+        <a href="index.html" class="logo"><i class="fas fa-road"></i> RoadFix</a>
+        <div class="nav-right">
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html" class="active">About</a></li>
+                <li><a href="report.html">Report Issue</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="faq.html">FAQ</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+            <div class="nav-user-info" id="navUserInfo"></div>
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Theme">
+                <i class="fas fa-moon" id="theme-icon"></i>
+            </button>
         </div>
-    </nav>
+    </div>
+</nav>
+<script>
+(function(){
+    const role=localStorage.getItem('userRole'),name=localStorage.getItem('userName');
+    if(!role){window.location.href='login.html';return;}
+    const info=document.getElementById('navUserInfo');
+    if(info){info.innerHTML=`<span class="role-badge role-${role}">${role.charAt(0).toUpperCase()+role.slice(1)}</span><button class="btn-logout" onclick="handleLogout()" title="Logout"><i class="fas fa-sign-out-alt"></i></button>`;}
+    window.handleLogout=async function(){try{await fetch('/api/auth/logout',{method:'POST',headers:{'x-user-role':role,'x-user-name':name||''}});}catch(e){}localStorage.clear();window.location.href='login.html';};
+})();
+</script>
 
-    <header class="info-hero">
-        <div class="container">
-            <h1>Our Mission: <span>Safer Roads for All.</span></h1>
-            <p>RoadFix is a community-driven platform designed to bridge the gap between citizens and local authorities to ensure our infrastructure stays in top shape.</p>
+<div class="hero">
+    <div class="container">
+        <h1>About <span>RoadFix</span></h1>
+        <p>Built by citizens, for citizens. Empowering communities to report and track road issues in real time.</p>
+    </div>
+</div>
+
+<main class="container" style="max-width:900px;padding-bottom:5rem;">
+
+    <div class="form-container" style="margin-bottom:3rem;">
+        <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:1rem;color:var(--text-primary);">Our Mission</h2>
+        <p style="color:var(--text-secondary);font-size:1.05rem;line-height:1.8;">
+            RoadFix is a civic reporting platform designed to close the gap between citizens who spot road hazards
+            and the maintenance crews who fix them. We believe public infrastructure should be maintained
+            transparently, with real-time accountability for every submitted issue.
+        </p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:2rem;margin-bottom:3rem;">
+        <div class="form-container" style="margin:0;text-align:center;">
+            <div style="font-size:2.5rem;color:var(--primary);margin-bottom:1rem;"><i class="fas fa-map-pin"></i></div>
+            <h3 style="font-weight:800;margin-bottom:.5rem;">Report Instantly</h3>
+            <p style="color:var(--text-secondary);font-size:.95rem;line-height:1.7;">Pin exact GPS coordinates, attach a photo, and submit in under 60 seconds.</p>
         </div>
-    </header>
-
-    <main class="container info-main">
-        <section class="about-grid">
-            <div class="about-content">
-                <h2>Why RoadFix?</h2>
-                <p>Poor road conditions like potholes, broken streetlights, and faded signs aren't just inconvenient—they're dangerous. Traditionally, reporting these issues involved complex bureaucracy and long wait times.</p>
-                <p>RoadFix changes that by providing a streamlined, GPS-enabled reporting tool that puts the power of change directly into the hands of the citizens.</p>
-                <a href="index.html" class="btn btn-primary" style="width: auto; padding: 1rem 2.5rem;">
-                    Start Reporting <i class="fas fa-arrow-right"></i>
-                </a>
-            </div>
-            <div class="about-image">
-                <!-- Image placeholder for road maintenance -->
-                <img src="https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?q=80&w=1000&auto=format&fit=crop" alt="Road Maintenance" style="width: 100%; border-radius: var(--radius-lg); box-shadow: var(--shadow-xl);">
-            </div>
-        </section>
-
-        <section class="about-features">
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fas fa-map-marker-alt"></i></div>
-                <h3>Precision Tracking</h3>
-                <p>Using real-time geolocation, we pinpoint exactly where the issue is, making it easier for repair crews to find and fix it.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
-                <h3>Public Accountability</h3>
-                <p>Our public dashboard allows everyone to see reported issues and track their progress from "Reported" to "Resolved".</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fas fa-bolt"></i></div>
-                <h3>Faster Response</h3>
-                <p>By digitizing the reporting process, we reduce administrative delays and help prioritize high-impact road repairs.</p>
-            </div>
-        </section>
-    </main>
-
-    <footer style="padding: 4rem 0; border-top: 1px solid var(--border); margin-top: 4rem;">
-        <div class="container" style="text-align: center; color: var(--text-muted);">
-            <p>&copy; 2026 RoadFix Infrastructure Solutions. All rights reserved.</p>
+        <div class="form-container" style="margin:0;text-align:center;">
+            <div style="font-size:2.5rem;color:var(--primary);margin-bottom:1rem;"><i class="fas fa-chart-line"></i></div>
+            <h3 style="font-weight:800;margin-bottom:.5rem;">Track Progress</h3>
+            <p style="color:var(--text-secondary);font-size:.95rem;line-height:1.7;">Watch your report move from Reported → In Progress → Resolved on the live dashboard.</p>
         </div>
-    </footer>
+        <div class="form-container" style="margin:0;text-align:center;">
+            <div style="font-size:2.5rem;color:var(--primary);margin-bottom:1rem;"><i class="fas fa-shield-halved"></i></div>
+            <h3 style="font-weight:800;margin-bottom:.5rem;">Accountable System</h3>
+            <p style="color:var(--text-secondary);font-size:.95rem;line-height:1.7;">Role-based access and full audit logs ensure every action is recorded and traceable.</p>
+        </div>
+    </div>
+
+    <div class="form-container">
+        <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:1rem;color:var(--text-primary);">Tech Stack</h2>
+        <div style="display:flex;flex-wrap:wrap;gap:.75rem;">
+            <span style="background:var(--info-bg);color:var(--info);padding:.4rem 1rem;border-radius:999px;font-weight:700;font-size:.9rem;">Node.js</span>
+            <span style="background:var(--info-bg);color:var(--info);padding:.4rem 1rem;border-radius:999px;font-weight:700;font-size:.9rem;">Express.js</span>
+            <span style="background:var(--info-bg);color:var(--info);padding:.4rem 1rem;border-radius:999px;font-weight:700;font-size:.9rem;">Socket.io</span>
+            <span style="background:var(--success-bg);color:var(--success);padding:.4rem 1rem;border-radius:999px;font-weight:700;font-size:.9rem;">Vanilla JS</span>
+            <span style="background:var(--success-bg);color:var(--success);padding:.4rem 1rem;border-radius:999px;font-weight:700;font-size:.9rem;">Leaflet Maps</span>
+            <span style="background:rgba(168,85,247,0.1);color:#a855f7;padding:.4rem 1rem;border-radius:999px;font-weight:700;font-size:.9rem;">CSS Glassmorphism</span>
+        </div>
+    </div>
+</main>
 </body>
 </html>
