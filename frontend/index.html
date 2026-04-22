@@ -3,19 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RoadFix - Citizen Feedback</title>
-    <!-- Outfit Font -->
+    <title>RoadFix - Home</title>
+    <meta
+      name="description"
+      content="RoadFix helps citizens report road issues quickly and track resolution progress in real time."
+    />
     <link
       href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
     <script src="js/theme.js"></script>
     <link rel="stylesheet" href="css/style.css" />
-    <!-- Leaflet CSS -->
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
@@ -29,8 +27,12 @@
         >
         <div class="nav-right">
           <ul class="nav-links">
-            <li><a href="index.html" class="active">Report Issue</a></li>
+            <li><a href="index.html" class="active">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="report.html">Report Issue</a></li>
             <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="faq.html">FAQ</a></li>
+            <li><a href="contact.html">Contact</a></li>
             <li id="auditNavLink" style="display: none">
               <a href="audit.html">Audit Log</a>
             </li>
@@ -47,7 +49,6 @@
       </div>
     </nav>
 
-    <!-- Auth guard + nav user display -->
     <script>
       (function () {
         const role = localStorage.getItem("userRole");
@@ -91,123 +92,128 @@
       })();
     </script>
 
-    <div class="hero">
+    <header class="landing-hero">
       <div class="container">
-        <h1>Report Road Issues <span>Instantly.</span></h1>
+        <h1>Safer Roads Start With One Report.</h1>
         <p>
-          Help us map out potholes, blocked drains, and other road
-          infrastructure problems. Your reports help maintenance crews fix
-          issues faster than ever.
+          RoadFix lets communities flag hazards, helps inspectors prioritize
+          work, and keeps everyone updated from report to resolution.
         </p>
-      </div>
-    </div>
+        <div class="hero-btns">
+          <a class="btn-premium" href="report.html">
+            <i class="fas fa-location-dot"></i> Report an Issue
+          </a>
+          <a class="btn-premium-outline" href="dashboard.html">
+            <i class="fas fa-chart-line"></i> View Dashboard
+          </a>
+        </div>
 
-    <main class="container">
-      <section class="form-container">
-        <form id="reportForm">
-          <div class="form-group">
-            <label for="title"
-              >Issue Title <span class="required">*</span></label
-            >
-            <input
-              type="text"
-              id="title"
-              name="title"
-              required
-              placeholder="e.g., Deep pothole on Main Street"
-            />
+        <div class="hero-stats home-stat-card">
+          <div class="hero-stat-item">
+            <h3 id="statTotal">0</h3>
+            <p>Total Reports</p>
           </div>
-
-          <div class="form-group grid-2">
-            <div>
-              <label for="category"
-                >Category <span class="required">*</span></label
-              >
-              <select id="category" name="category" required>
-                <option value="" disabled selected>
-                  Select an issue category
-                </option>
-                <option value="Pothole">Pothole</option>
-                <option value="Blocked Drain">Blocked Drain</option>
-                <option value="Streetlight Issue">Streetlight Issue</option>
-                <option value="Faded Road Signs">Faded Road Signs</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-            <div>
-              <label for="image">Upload Image</label>
-              <div class="input-with-icon">
-                <i class="fas fa-camera"></i>
-                <input type="file" id="image" name="image" accept="image/*" />
-              </div>
-              <div class="help-text">
-                Attach a photo of the road issue (Max 5MB).
-              </div>
-            </div>
+          <div class="hero-stat-item">
+            <h3 id="statFixed">0</h3>
+            <p>Resolved Issues</p>
           </div>
-
-          <div class="form-group">
-            <label for="description">Detailed Description</label>
-            <textarea
-              id="description"
-              name="description"
-              rows="4"
-              placeholder="Provide any additional context, landmarks, or details..."
-            ></textarea>
-          </div>
-
-          <div class="form-group">
-            <label>Pin Location <span class="required">*</span></label>
-            <div class="help-text">
-              Click on the map to pin the exact location or drag the marker.
-            </div>
-            <div id="map" class="map-container"></div>
-            <input type="hidden" id="latitude" name="latitude" required />
-            <input type="hidden" id="longitude" name="longitude" required />
-          </div>
-
-          <div class="form-group">
-            <label for="address">Nearest Address / Landmark</label>
-            <input
-              type="text"
-              id="address"
-              name="address"
-              placeholder="e.g., Near City Mall North Entrance"
-            />
-          </div>
-
-          <button type="submit" class="btn btn-primary" id="submitBtn">
-            <i class="fas fa-paper-plane"></i> Submit Report
-          </button>
-          <div id="formMessage" class="message hidden"></div>
-        </form>
-
-        <!-- Success Banner (shown after submission) -->
-        <div id="successBanner" class="success-banner hidden">
-          <div class="success-banner-icon">
-            <i class="fas fa-check-circle"></i>
-          </div>
-          <div class="success-banner-body">
-            <h3>Report Submitted Successfully! 🎉</h3>
-            <p id="successDetail">
-              Your issue has been logged and assigned a tracking ID.
-            </p>
-            <div class="success-banner-actions">
-              <button class="btn-success-report" onclick="resetToForm()">
-                <i class="fas fa-plus"></i> Submit Another Report
-              </button>
-              <a href="dashboard.html" class="btn-success-dashboard">
-                <i class="fas fa-tachometer-alt"></i> View on Dashboard
-              </a>
-            </div>
+          <div class="hero-stat-item">
+            <h3 id="statUsers">0</h3>
+            <p>Active Citizens</p>
           </div>
         </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <section
+        class="reveal home-section-title"
+        style="margin: 2rem 0 2.25rem; text-align: center"
+      >
+        <h2 class="section-title" style="justify-content: center">
+          How RoadFix Works
+        </h2>
+      </section>
+
+      <section class="process-container" style="margin-bottom: 5rem">
+        <article class="process-step reveal home-step-card">
+          <div class="step-icon-wrapper">
+            <span class="step-badge">1</span>
+            <i class="fas fa-bullseye"></i>
+          </div>
+          <h3>Submit</h3>
+          <p>
+            Create a detailed report with title, category, image, and exact map
+            location.
+          </p>
+        </article>
+        <div class="step-connector reveal"></div>
+        <article class="process-step reveal home-step-card">
+          <div class="step-icon-wrapper">
+            <span class="step-badge">2</span>
+            <i class="fas fa-clipboard-check"></i>
+          </div>
+          <h3>Review</h3>
+          <p>
+            Inspectors triage incoming issues and assign actions based on
+            severity and SLA.
+          </p>
+        </article>
+        <div class="step-connector reveal"></div>
+        <article class="process-step reveal home-step-card">
+          <div class="step-icon-wrapper">
+            <span class="step-badge">3</span>
+            <i class="fas fa-circle-check"></i>
+          </div>
+          <h3>Resolve</h3>
+          <p>
+            Progress is visible on the dashboard until work is marked complete
+            and verified.
+          </p>
+        </article>
+      </section>
+
+      <section class="cta-banner reveal home-cta-card">
+        <h2 style="font-size: 2.2rem; margin-bottom: 1rem">
+          See Something Unsafe?
+        </h2>
+        <p
+          style="
+            max-width: 680px;
+            margin: 0 auto 2rem;
+            color: var(--text-secondary);
+          "
+        >
+          The faster an issue is reported, the faster crews can respond. Help
+          make roads safer for everyone.
+        </p>
+        <a class="btn-premium" href="report.html">
+          <i class="fas fa-paper-plane"></i> Start a Report
+        </a>
       </section>
     </main>
 
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="js/toast.js"></script>
-    <script src="js/app.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/home.js"></script>
+    <script>
+      (function () {
+        const reveals = document.querySelectorAll(".reveal");
+        if (!("IntersectionObserver" in window)) {
+          reveals.forEach((el) => el.classList.add("revealed"));
+          return;
+        }
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              entry.target.classList.add("revealed");
+              io.unobserve(entry.target);
+            });
+          },
+          { threshold: 0.15 },
+        );
+        reveals.forEach((el) => io.observe(el));
+      })();
+    </script>
   </body>
 </html>

@@ -294,7 +294,7 @@ label {
     margin-bottom: 0.75rem;
 }
 
-input[type="text"], select, textarea {
+input[type="text"], input[type="email"], select, textarea {
     width: 100%;
     padding: 1rem 1.25rem;
     border: 1.5px solid var(--border);
@@ -306,7 +306,7 @@ input[type="text"], select, textarea {
     transition: var(--transition);
 }
 
-input[type="text"]::placeholder, textarea::placeholder {
+input[type="text"]::placeholder, input[type="email"]::placeholder, textarea::placeholder {
     color: var(--text-muted);
 }
 
@@ -1135,6 +1135,52 @@ input:focus, select:focus, textarea:focus {
     margin-bottom: 1rem;
 }
 
+.feature-card p {
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+
+.tech-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.tech-pill {
+    padding: 0.4rem 1rem;
+    border-radius: var(--radius-full);
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.tech-pill.info {
+    background: var(--info-bg);
+    color: var(--info);
+}
+
+.tech-pill.success {
+    background: var(--success-bg);
+    color: var(--success);
+}
+
+.tech-pill.purple {
+    background: rgba(168, 85, 247, 0.1);
+    color: #a855f7;
+}
+
+.about-visual-wrap {
+    margin-top: 1.5rem;
+}
+
+.about-visual {
+    width: 100%;
+    display: block;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+}
+
 /* FAQ Accordion */
 .faq-container {
     max-width: 800px;
@@ -1234,6 +1280,19 @@ input:focus, select:focus, textarea:focus {
     color: var(--text-secondary);
     text-decoration: none;
     font-size: 0.95rem;
+}
+
+.contact-box-details a:hover {
+    color: var(--primary);
+}
+
+.contact-form-card {
+    margin: 0;
+    max-width: none;
+}
+
+.contact-success-banner {
+    margin-bottom: 1.5rem;
 }
 
 @media (max-width: 992px) {

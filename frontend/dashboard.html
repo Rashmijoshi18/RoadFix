@@ -1,125 +1,152 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard - RoadFix</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
     <script src="js/theme.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body class="premium-ui">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body class="premium-ui">
     <div class="mesh-bg"></div>
     <nav class="navbar">
-        <div class="container nav-container">
-            <a href="index.html" class="logo"><i class="fas fa-road"></i> RoadFix</a>
-            <div class="nav-right">
-                <ul class="nav-links">
-                    <li><a href="index.html">Report Issue</a></li>
-                    <li><a href="dashboard.html" class="active">Dashboard</a></li>
-                    <li id="auditNavLink" style="display: none;"><a href="audit.html">Audit Log</a></li>
-                </ul>
-                <div class="nav-user-info" id="navUserInfo"></div>
-                <div class="live-indicator">
-                    <div class="live-dot offline" id="liveDot"></div>
-                    <span id="liveText">Offline</span>
-                </div>
-                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Theme">
-                    <i class="fas fa-moon" id="theme-icon"></i>
-                </button>
-            </div>
+      <div class="container nav-container">
+        <a href="index.html" class="logo"
+          ><i class="fas fa-road"></i> RoadFix</a
+        >
+        <div class="nav-right">
+          <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="report.html">Report Issue</a></li>
+            <li><a href="dashboard.html" class="active">Dashboard</a></li>
+            <li><a href="faq.html">FAQ</a></li>
+            <li><a href="contact.html">Contact</a></li>
+            <li id="auditNavLink" style="display: none">
+              <a href="audit.html">Audit Log</a>
+            </li>
+          </ul>
+          <div class="nav-user-info" id="navUserInfo"></div>
+          <div class="live-indicator">
+            <div class="live-dot offline" id="liveDot"></div>
+            <span id="liveText">Offline</span>
+          </div>
+          <button
+            class="theme-toggle"
+            onclick="toggleTheme()"
+            aria-label="Toggle Theme"
+          >
+            <i class="fas fa-moon" id="theme-icon"></i>
+          </button>
         </div>
+      </div>
     </nav>
 
     <!-- Auth guard + nav user display -->
     <script>
-        (function() {
-            const role = localStorage.getItem('userRole');
-            const name = localStorage.getItem('userName');
-            if (!role) { window.location.href = 'login.html'; return; }
-            if (role === 'admin') {
-                const auditLink = document.getElementById('auditNavLink');
-                if (auditLink) auditLink.style.display = 'block';
-            }
+      (function () {
+        const role = localStorage.getItem("userRole");
+        const name = localStorage.getItem("userName");
+        if (!role) {
+          window.location.href = "login.html";
+          return;
+        }
+        if (role === "admin") {
+          const auditLink = document.getElementById("auditNavLink");
+          if (auditLink) auditLink.style.display = "block";
+        }
 
-            const info = document.getElementById('navUserInfo');
-            if (info) {
-                info.innerHTML = `
+        const info = document.getElementById("navUserInfo");
+        if (info) {
+          info.innerHTML = `
                     <span class="role-badge role-${role}">${role.charAt(0).toUpperCase() + role.slice(1)}</span>
                     <button class="btn-logout" onclick="handleLogout()" title="Logout">
                         <i class="fas fa-sign-out-alt"></i>
                     </button>
                 `;
-            }
+        }
 
-            window.handleLogout = async function() {
-                try {
-                    await fetch('/api/auth/logout', {
-                        method: 'POST',
-                        headers: {
-                            'x-user-role': role || 'unknown',
-                            'x-user-id': localStorage.getItem('userId') || 'unknown',
-                            'x-user-name': name || 'Unknown'
-                        }
-                    });
-                } catch(e) { console.error('Logout error:', e); }
-                localStorage.clear();
-                window.location.href = 'login.html';
-            };
-        })();
+        window.handleLogout = async function () {
+          try {
+            await fetch("/api/auth/logout", {
+              method: "POST",
+              headers: {
+                "x-user-role": role || "unknown",
+                "x-user-id": localStorage.getItem("userId") || "unknown",
+                "x-user-name": name || "Unknown",
+              },
+            });
+          } catch (e) {
+            console.error("Logout error:", e);
+          }
+          localStorage.clear();
+          window.location.href = "login.html";
+        };
+      })();
     </script>
 
     <main class="container">
-        <header class="dashboard-header">
-            <div>
-                <h1>Community <span>Dashboard.</span></h1>
-                <p>View, manage and resolve reported civilian road maintenance issues.</p>
-            </div>
-        </header>
+      <header class="dashboard-header">
+        <div>
+          <h1>Community <span>Dashboard.</span></h1>
+          <p>
+            View, manage and resolve reported civilian road maintenance issues.
+          </p>
+        </div>
+      </header>
 
-        <section id="statsContainer" class="stats-container">
-            <!-- Stats inserted via JS -->
-        </section>
+      <section id="statsContainer" class="stats-container">
+        <!-- Stats inserted via JS -->
+      </section>
 
-        <section class="filters-container">
-            <div class="filter-group">
-                <label for="filterCategory"><i class="fas fa-filter"></i> Category:</label>
-                <select id="filterCategory">
-                    <option value="">All Categories</option>
-                    <option value="Pothole">Pothole</option>
-                    <option value="Blocked Drain">Blocked Drain</option>
-                    <option value="Streetlight Issue">Streetlight Issue</option>
-                    <option value="Faded Road Signs">Faded Road Signs</option>
-                    <option value="Other">Other</option>
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <label for="filterStatus"><i class="fas fa-tasks"></i> Status:</label>
-                <select id="filterStatus">
-                    <option value="">All Statuses</option>
-                    <option value="sla-breached">SLA Breached (Alert)</option>
-                    <option value="Reported">Reported</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Resolved">Resolved</option>
-                </select>
-            </div>
-        </section>
-
-        <!-- Loader -->
-        <div id="loader" style="display: none;">
-            <div class="spinner"></div>
+      <section class="filters-container">
+        <div class="filter-group">
+          <label for="filterCategory"
+            ><i class="fas fa-filter"></i> Category:</label
+          >
+          <select id="filterCategory">
+            <option value="">All Categories</option>
+            <option value="Pothole">Pothole</option>
+            <option value="Blocked Drain">Blocked Drain</option>
+            <option value="Streetlight Issue">Streetlight Issue</option>
+            <option value="Faded Road Signs">Faded Road Signs</option>
+            <option value="Other">Other</option>
+          </select>
         </div>
 
-        <section class="reports-grid" id="reportsGrid">
-            <!-- Dynamic Report Cards injected here via JS -->
-        </section>
+        <div class="filter-group">
+          <label for="filterStatus"><i class="fas fa-tasks"></i> Status:</label>
+          <select id="filterStatus">
+            <option value="">All Statuses</option>
+            <option value="sla-breached">SLA Breached (Alert)</option>
+            <option value="Reported">Reported</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Resolved">Resolved</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- Loader -->
+      <div id="loader" style="display: none">
+        <div class="spinner"></div>
+      </div>
+
+      <section class="reports-grid" id="reportsGrid">
+        <!-- Dynamic Report Cards injected here via JS -->
+      </section>
     </main>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/toast.js"></script>
     <script src="js/sla.js"></script>
     <script src="js/dashboard.js"></script>
-</body>
+  </body>
 </html>
