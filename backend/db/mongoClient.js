@@ -1,4 +1,5 @@
 const { MongoClient } = require('mongodb');
+const bcrypt = require('bcryptjs');
 
 const mongoUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017';
 const dbName = process.env.MONGODB_DB_NAME || 'roadfix';
@@ -42,10 +43,16 @@ async function seedDefaultUsers() {
 
     if (count > 0) return;
 
+    const [adminHash, inspectorHash, citizenHash] = await Promise.all([
+        bcrypt.hash('admin123', 10),
+        bcrypt.hash('inspect123', 10),
+        bcrypt.hash('citizen123', 10)
+    ]);
+
     await users.insertMany([
-        { id: 'user1', name: 'Admin User', email: 'admin@roadfix.com', password: 'admin123', role: 'admin' },
-        { id: 'user2', name: 'Raj Kumar', email: 'inspector@roadfix.com', password: 'inspect123', role: 'inspector' },
-        { id: 'user3', name: 'Priya Singh', email: 'citizen@roadfix.com', password: 'citizen123', role: 'citizen' }
+        { id: 'user1', name: 'Admin User', email: 'admin@roadfix.com', password: adminHash, role: 'admin', createdAt: new Date().toISOString() },
+        { id: 'user2', name: 'Raj Kumar', email: 'inspector@roadfix.com', password: inspectorHash, role: 'inspector', createdAt: new Date().toISOString() },
+        { id: 'user3', name: 'Priya Singh', email: 'citizen@roadfix.com', password: citizenHash, role: 'citizen', createdAt: new Date().toISOString() }
     ]);
 }
 
