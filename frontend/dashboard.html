@@ -98,13 +98,69 @@
         <div>
           <h1>Community <span>Dashboard.</span></h1>
           <p>
-            View, manage and resolve reported civilian road maintenance issues.
+            Track all reported road issues in one place, monitor live status
+            changes, prioritize urgent complaints, and take quick action using
+            search, filters, sorting, and role-based controls.
           </p>
+          <p id="welcomeLine" class="dashboard-welcome-line"></p>
         </div>
       </header>
 
+      <section class="dashboard-help" aria-label="How to use dashboard">
+        <h2><i class="fas fa-compass"></i> Quick Guide</h2>
+        <div class="dashboard-help-grid">
+          <article class="help-card">
+            <h3>1. Find Issues Fast</h3>
+            <p>
+              Use search and category/status filters to narrow reports
+              instantly.
+            </p>
+          </article>
+          <article class="help-card">
+            <h3>2. Prioritize Smartly</h3>
+            <p>
+              Sort by SLA Priority or Most Upvoted to handle high-impact issues
+              first.
+            </p>
+          </article>
+          <article class="help-card">
+            <h3>3. Take Action</h3>
+            <p id="roleActionTip">
+              Update and resolve reports based on your role permissions.
+            </p>
+          </article>
+        </div>
+      </section>
+
       <section id="statsContainer" class="stats-container">
         <!-- Stats inserted via JS -->
+      </section>
+
+      <section class="dashboard-toolbar" aria-label="Dashboard controls">
+        <div class="toolbar-left">
+          <label for="searchReports" class="toolbar-label"
+            ><i class="fas fa-search"></i> Search Reports</label
+          >
+          <input
+            id="searchReports"
+            type="text"
+            placeholder="Search by title, location, category, or description"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="toolbar-right">
+          <label for="sortReports" class="toolbar-label">Sort By</label>
+          <select id="sortReports">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="upvotes">Most Upvoted</option>
+            <option value="sla">SLA Priority</option>
+          </select>
+          <button id="clearFilters" class="dashboard-clear-btn" type="button">
+            <i class="fas fa-rotate-left"></i> Clear
+          </button>
+        </div>
       </section>
 
       <section class="filters-container">
@@ -128,11 +184,13 @@
             <option value="">All Statuses</option>
             <option value="sla-breached">SLA Breached (Alert)</option>
             <option value="Reported">Reported</option>
-            <option value="In Progress">In Progress</option>
+            <option value="Pending">Pending</option>
             <option value="Resolved">Resolved</option>
           </select>
         </div>
       </section>
+
+      <div id="resultsMeta" class="results-meta" aria-live="polite"></div>
 
       <!-- Loader -->
       <div id="loader" style="display: none">

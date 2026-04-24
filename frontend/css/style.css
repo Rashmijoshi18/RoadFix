@@ -518,6 +518,135 @@ input:focus, select:focus, textarea:focus {
     font-size: 1.15rem;
 }
 
+.dashboard-welcome-line {
+    margin-top: 0.5rem;
+    font-size: 0.98rem !important;
+    color: var(--text-muted) !important;
+}
+
+.dashboard-help {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.dashboard-help h2 {
+    font-size: 1.1rem;
+    margin: 0 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--text-primary);
+}
+
+.dashboard-help-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.75rem;
+}
+
+.help-card {
+    background: var(--bg-solid);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 0.8rem;
+}
+
+.help-card h3 {
+    margin: 0 0 0.35rem;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+
+.help-card p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.dashboard-toolbar {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 1rem;
+}
+
+.toolbar-left {
+    flex: 1;
+    min-width: 250px;
+}
+
+.toolbar-right {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.toolbar-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+    font-weight: 700;
+}
+
+#searchReports,
+#sortReports {
+    min-height: 2.9rem;
+}
+
+#searchReports {
+    width: 100%;
+}
+
+#sortReports {
+    min-width: 170px;
+    border-radius: var(--radius-full);
+    padding: 0.7rem 2.2rem 0.7rem 1rem;
+}
+
+.dashboard-clear-btn {
+    border: 1px solid var(--border);
+    background: var(--bg-solid);
+    color: var(--text-primary);
+    border-radius: var(--radius-full);
+    padding: 0.72rem 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.dashboard-clear-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: translateY(-1px);
+}
+
+.results-meta {
+    margin: 0.5rem 0 1rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.results-meta strong {
+    color: var(--text-primary);
+}
+
 /* Filters */
 .filters-container {
     background: var(--bg-card);
@@ -1726,6 +1855,24 @@ input:focus, select:focus, textarea:focus {
     .filters-container {
         flex-direction: column;
         align-items: stretch;
+    }
+
+    .dashboard-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .dashboard-help-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .toolbar-right {
+        align-items: stretch;
+    }
+
+    #sortReports,
+    .dashboard-clear-btn {
+        width: 100%;
     }
 
     .filter-group select {
