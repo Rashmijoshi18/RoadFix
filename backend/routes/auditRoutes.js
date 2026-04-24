@@ -4,9 +4,9 @@ const checkRole = require('../middleware/checkRole');
 const { getAllAuditLogs } = require('../db/auditDatabase');
 
 // GET /api/audit — returns all logs, protected for admin only
-router.get('/', checkRole(['admin']), (req, res) => {
+router.get('/', checkRole(['admin']), async (req, res) => {
     try {
-        const logs = getAllAuditLogs();
+        const logs = await getAllAuditLogs();
         return res.json({ success: true, data: logs, error: null });
     } catch (err) {
         console.error('Audit GET Error:', err.message);

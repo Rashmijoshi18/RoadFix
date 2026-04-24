@@ -1,18 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const fs = require('fs');
-const path = require('path');
+const { getCollection } = require('../db/mongoClient');
 
-const MESSAGES_FILE = path.join(__dirname, '../db/contact_messages.txt');
-
-if (!fs.existsSync(path.dirname(MESSAGES_FILE))) {
-    fs.mkdirSync(path.dirname(MESSAGES_FILE), { recursive: true });
-}
-if (!fs.existsSync(MESSAGES_FILE)) {
-    fs.writeFileSync(MESSAGES_FILE, '[]');
-}
-
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
     try {
         const { name, email, subject, message } = req.body;
         if(!name || !email || !subject || !message) {
@@ -29,9 +19,7 @@ router.post('/', (req, res) => {
             return res.status(400).json({ success: false, error: 'Message must be at least 20 characters.' });
         }
 
-        const raw = fs.readFileSync(MESSAGES_FILE, 'utf8');
-        let messages = [];
-        try { messages = JSON.parse(raw); } catch(e) { messages = []; }
+        const messages = await getCollection('contact_messages');
 
         const newMessage = {
             id: Date.now().toString(),
@@ -42,8 +30,7 @@ router.post('/', (req, res) => {
             timestamp: new Date().toISOString()
         };
 
-        messages.push(newMessage);
-        fs.writeFileSync(MESSAGES_FILE, JSON.stringify(messages, null, 2));
+        await messages.insertOne(newMessage);
 
         res.json({ success: true, data: { message: 'Sent!' } });
     } catch(err) {

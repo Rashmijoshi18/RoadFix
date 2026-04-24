@@ -1,4 +1,5 @@
-const db = require('../db/database');
+const { ObjectId } = require('mongodb');
+const { getCollection } = require('../db/mongoClient');
 const { appendAuditLog } = require('../db/auditDatabase');
 
 let io;
@@ -10,23 +11,38 @@ const getActor = (req) => ({
     role: req.headers['x-user-role'] || 'unknown'
 });
 
-const getReports = (req, res) => {
-    const { category, status } = req.query;
-    db.all('SELECT * FROM reports', [], (err, rows) => {
-        if (err) return res.status(500).json({ error: err.message });
-        
-        let records = rows;
-        if (category) records = records.filter(r => r.category === category);
-        if (status) records = records.filter(r => r.status === status);
-        
-        // Sorting by newest first
-        records.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        
-        res.json({ success: true, data: records });
-    });
+const mapReport = (doc) => {
+    if (!doc) return null;
+
+    return {
+        ...doc,
+        id: doc._id.toString(),
+        createdAt: doc.createdAt || doc.created_at || new Date().toISOString()
+    };
 };
 
-const createReport = (req, res) => {
+const toObjectId = (id) => {
+    if (!ObjectId.isValid(id)) return null;
+    return new ObjectId(id);
+};
+
+const getReports = async (req, res) => {
+    try {
+        const { category, status } = req.query;
+        const reports = await getCollection('reports');
+
+        const filter = {};
+        if (category) filter.category = category;
+        if (status) filter.status = status;
+
+        const rows = await reports.find(filter).sort({ createdAt: -1 }).toArray();
+        res.json({ success: true, data: rows.map(mapReport) });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+const createReport = async (req, res) => {
     if (!req.body || Object.keys(req.body).length === 0) {
         return res.status(400).json({ error: 'Request body is empty.' });
     }
@@ -42,142 +58,156 @@ const createReport = (req, res) => {
         image_url = `/uploads/${req.file.filename}`;
     }
 
-    const sql = `INSERT INTO reports (title, description, category, latitude, longitude, address, image_url)
-                 VALUES (?, ?, ?, ?, ?, ?, ?)`;
-    const params = [title, description, category, parseFloat(latitude), parseFloat(longitude), address, image_url];
+    try {
+        const reports = await getCollection('reports');
+        const insertPayload = {
+            title,
+            description,
+            category,
+            latitude: Number.isFinite(parseFloat(latitude)) ? parseFloat(latitude) : null,
+            longitude: Number.isFinite(parseFloat(longitude)) ? parseFloat(longitude) : null,
+            address,
+            image_url,
+            status: 'Reported',
+            solution: null,
+            createdAt: new Date().toISOString(),
+            upvotedBy: []
+        };
 
-    db.run(sql, params, function (err) {
-        if (err) return res.status(500).json({ error: err.message });
-        
-        const reportId = this.lastID;
+        const result = await reports.insertOne(insertPayload);
+        const reportId = result.insertedId.toString();
         const actor = getActor(req);
 
-        // Fetch the new report to emit it
-        db.all('SELECT * FROM reports', [], (err, rows) => {
-            const newReport = rows.find(r => r.id == reportId);
-            
-            appendAuditLog({
-                action: 'report.created',
-                actor: actor,
-                reportId: reportId.toString(),
-                details: `Report #${reportId} titled '${title}' submitted in category ${category}`
-            });
+        const newReport = mapReport({ _id: result.insertedId, ...insertPayload });
 
-            // Emit socket event
-            if (io) io.emit('report:new', newReport);
-
-            res.status(201).json({
-                success: true,
-                data: { reportId }
-            });
+        await appendAuditLog({
+            action: 'report.created',
+            actor,
+            reportId,
+            details: `Report #${reportId} titled '${title}' submitted in category ${category}`
         });
-    });
+
+        if (io) io.emit('report:new', newReport);
+
+        res.status(201).json({
+            success: true,
+            data: { reportId }
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 };
 
-const updateReportStatus = (req, res) => {
+const updateReportStatus = async (req, res) => {
     const { id } = req.params;
     const { status, solution } = req.body;
 
     if (!status) return res.status(400).json({ error: 'Status is required.' });
+    const objectId = toObjectId(id);
+    if (!objectId) return res.status(400).json({ error: 'Invalid report ID' });
 
-    db.all('SELECT * FROM reports', [], (err, rows) => {
-        if (err) return res.status(500).json({ error: err.message });
-        const existing = rows.find(r => r.id == id);
+    try {
+        const reports = await getCollection('reports');
+        const existing = await reports.findOne({ _id: objectId });
         if (!existing) return res.status(404).json({ error: 'Report not found' });
-        
+
         const oldStatus = existing.status;
-        let sql = `UPDATE reports SET status = ?`;
-        let params = [status];
+        const updateDoc = { status };
+        if (solution !== undefined) updateDoc.solution = solution;
 
-        if (solution !== undefined) {
-            sql += `, solution = ?`;
-            params.push(solution);
-        }
-        sql += ` WHERE id = ?`;
-        params.push(id);
+        const updated = await reports.findOneAndUpdate(
+            { _id: objectId },
+            { $set: updateDoc },
+            { returnDocument: 'after' }
+        );
+        const updatedReport = updated && updated.value ? updated.value : updated;
 
-        db.run(sql, params, function (err) {
-            if (err) return res.status(500).json({ error: err.message });
-            
-            const updatedReport = { ...existing, status, solution: solution || existing.solution };
-
-            appendAuditLog({
-                action: 'report.status_changed',
-                actor: getActor(req),
-                reportId: id.toString(),
-                details: `Status changed from ${oldStatus} to ${status} for report #${id}`
-            });
-
-            // Emit socket event
-            if (io) io.emit('report:updated', updatedReport);
-
-            res.json({ success: true, message: 'Status updated successfully' });
+        await appendAuditLog({
+            action: 'report.status_changed',
+            actor: getActor(req),
+            reportId: id.toString(),
+            details: `Status changed from ${oldStatus} to ${status} for report #${id}`
         });
-    });
+
+        if (io) io.emit('report:updated', mapReport(updatedReport));
+
+        res.json({ success: true, message: 'Status updated successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 };
 
-const upvoteReport = (req, res) => {
+const upvoteReport = async (req, res) => {
     const { id } = req.params;
     const userId = req.headers['x-user-id'];
 
     if (!userId) return res.status(400).json({ success: false, error: 'User ID required for upvoting' });
+    const objectId = toObjectId(id);
+    if (!objectId) return res.status(400).json({ error: 'Invalid report ID' });
 
-    db.all('SELECT * FROM reports', [], (err, rows) => {
-        if (err) return res.status(500).json({ error: err.message });
-        const existing = rows.find(r => r.id == id);
+    try {
+        const reports = await getCollection('reports');
+        const existing = await reports.findOne({ _id: objectId });
         if (!existing) return res.status(404).json({ error: 'Report not found' });
 
-        if (!existing.upvotedBy) existing.upvotedBy = [];
-        
-        const index = existing.upvotedBy.indexOf(userId);
+        const currentUpvotes = Array.isArray(existing.upvotedBy) ? existing.upvotedBy : [];
+        const index = currentUpvotes.indexOf(userId);
+        let isUpvoted = false;
+
         if (index === -1) {
-            existing.upvotedBy.push(userId); // Add upvote
+            currentUpvotes.push(userId);
+            isUpvoted = true;
         } else {
-            existing.upvotedBy.splice(index, 1); // Remove upvote
+            currentUpvotes.splice(index, 1);
         }
 
-        db.run('UPDATE reports SET upvotedBy = ? WHERE id = ?', [JSON.stringify(existing.upvotedBy), id], function(err) {
-            if (err) return res.status(500).json({ error: err.message });
+        await reports.updateOne({ _id: objectId }, { $set: { upvotedBy: currentUpvotes } });
 
-            if (io) io.emit('report:upvoted', { id, upvotes: existing.upvotedBy.length, upvotedBy: existing.upvotedBy });
+        if (io) io.emit('report:upvoted', { id, upvotes: currentUpvotes.length, upvotedBy: currentUpvotes });
 
-            res.json({ success: true, upvotes: existing.upvotedBy.length, isUpvoted: index === -1 });
-        });
-    });
+        res.json({ success: true, upvotes: currentUpvotes.length, isUpvoted });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 };
 
-const getReportStats = (req, res) => {
-    db.all('SELECT * FROM reports', [], (err, rows) => {
-        if (err) return res.status(500).json({ error: err.message });
-        
-        const statsObj = rows.reduce((acc, report) => {
-            acc[report.status] = (acc[report.status] || 0) + 1;
-            return acc;
-        }, {});
-        
-        const stats = Object.keys(statsObj).map(status => ({ status, count: statsObj[status] }));
+const getReportStats = async (req, res) => {
+    try {
+        const reports = await getCollection('reports');
+        const stats = await reports.aggregate([
+            { $group: { _id: '$status', count: { $sum: 1 } } },
+            { $project: { _id: 0, status: '$_id', count: 1 } }
+        ]).toArray();
+
         res.json({ success: true, data: stats });
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 };
 
-const deleteReport = (req, res) => {
+const deleteReport = async (req, res) => {
     const { id } = req.params;
-    const sql = `DELETE FROM reports WHERE id = ?`;
-    db.run(sql, [id], function(err) {
-        if (err) return res.status(500).json({ error: err.message });
-        
-        appendAuditLog({
+    const objectId = toObjectId(id);
+    if (!objectId) return res.status(400).json({ error: 'Invalid report ID' });
+
+    try {
+        const reports = await getCollection('reports');
+        const result = await reports.deleteOne({ _id: objectId });
+        if (!result.deletedCount) return res.status(404).json({ error: 'Report not found' });
+
+        await appendAuditLog({
             action: 'report.deleted',
             actor: getActor(req),
             reportId: id.toString(),
             details: `Report #${id} permanently deleted`
         });
 
-        // Emit socket event
         if (io) io.emit('report:deleted', { id });
 
         res.json({ success: true, message: 'Report deleted successfully' });
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 };
 
 module.exports = {

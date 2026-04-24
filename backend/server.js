@@ -11,6 +11,7 @@ const auditRoutes = require('./routes/auditRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const contactRoutes = require('./routes/contactRoutes');
 const reportController = require('./controllers/reportController');
+const { connectToDatabase, ensureIndexes, seedDefaultUsers } = require('./db/mongoClient');
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -61,6 +62,20 @@ app.get('/', (req, res) => {
 });
 
 // ----- START SERVER -----
-httpServer.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+async function startServer() {
+    try {
+        await connectToDatabase();
+        await ensureIndexes();
+        await seedDefaultUsers();
+
+        httpServer.listen(PORT, () => {
+            console.log(`Server running on port ${PORT}`);
+            console.log('MongoDB connection established');
+        });
+    } catch (err) {
+        console.error('Failed to start server:', err.message);
+        process.exit(1);
+    }
+}
+
+startServer();

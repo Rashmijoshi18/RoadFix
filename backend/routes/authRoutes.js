@@ -1,39 +1,68 @@
 const express = require('express');
 const router = express.Router();
+const { getCollection } = require('../db/mongoClient');
+const { appendAuditLog } = require('../db/auditDatabase');
 
-const USERS = [
-  { id:"user1", name:"Admin User", email:"admin@roadfix.com", password:"admin123", role:"admin" },
-  { id:"user2", name:"Raj Kumar", email:"inspector@roadfix.com", password:"inspect123", role:"inspector"},
-  { id:"user3", name:"Priya Singh", email:"citizen@roadfix.com", password:"citizen123", role:"citizen" }
-];
-
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
     const { email, password } = req.body;
-    const user = USERS.find(u => u.email === email && u.password === password);
-    
-    if (user) {
-        const { password, ...userData } = user; // Exclude password from the returned object for security
-        res.json({ success: true, data: userData });
-    } else {
-        res.status(401).json({ success: false, error: "Invalid credentials" });
+
+    try {
+        const users = await getCollection('users');
+        const user = await users.findOne({ email, password });
+
+        if (!user) {
+            return res.status(401).json({ success: false, error: 'Invalid credentials' });
+        }
+
+        const { password: _, _id, ...userData } = user;
+
+        await appendAuditLog({
+            action: 'user.login',
+            actor: { id: userData.id, name: userData.name, role: userData.role },
+            details: `User ${userData.name} logged in`
+        });
+
+        return res.json({ success: true, data: userData });
+    } catch (err) {
+        return res.status(500).json({ success: false, error: err.message });
     }
 });
 
-router.post('/logout', (req, res) => {
-    // True session invalidation could be managed here with tokens/cookies.
-    // For local storage implementation, backend acknowledges the logout request.
-    res.json({ success: true });
+router.post('/logout', async (req, res) => {
+    try {
+        const actor = {
+            id: req.headers['x-user-id'] || 'unknown',
+            name: req.headers['x-user-name'] || 'Unknown User',
+            role: req.headers['x-user-role'] || 'unknown'
+        };
+
+        await appendAuditLog({
+            action: 'user.logout',
+            actor,
+            details: `User ${actor.name} logged out`
+        });
+
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
 });
 
-router.get('/me', (req, res) => {
+router.get('/me', async (req, res) => {
     const userId = req.headers['x-user-id'];
-    const user = USERS.find(u => u.id === userId);
-    
-    if (user) {
-        const { password, ...userData } = user;
-        res.json({ success: true, data: userData });
-    } else {
-        res.status(404).json({ success: false, error: "User not found" });
+
+    try {
+        const users = await getCollection('users');
+        const user = await users.findOne({ id: userId });
+
+        if (!user) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+
+        const { password: _, _id, ...userData } = user;
+        return res.json({ success: true, data: userData });
+    } catch (err) {
+        return res.status(500).json({ success: false, error: err.message });
     }
 });
 
