@@ -26,8 +26,8 @@ project-ca/
 │   ├── controllers/
 │   │   └── reportController.js   # CRUD logic for reports
 │   ├── db/
-│   │   ├── database.js           # JSON-based data layer (no external DB needed)
-│   │   └── reports.txt           # Persistent storage file (auto-created)
+│   │   ├── mongoClient.js        # Shared MongoDB client + indexes + user seed
+│   │   └── auditDatabase.js      # Audit log helper backed by MongoDB
 │   ├── routes/
 │   │   └── reportRoutes.js       # Express routes + Multer file upload middleware
 │   ├── uploads/                  # Uploaded images stored here (git-ignored)
@@ -53,27 +53,40 @@ project-ca/
 
 - [Node.js](https://nodejs.org/) v16 or higher
 - npm (comes with Node.js)
+- MongoDB instance (local or Atlas)
 
 ### Installation
 
 **1. Clone the repository**
+
 ```bash
 git clone https://github.com/Rashmijoshi18/RoadFix.git
 cd RoadFix
 ```
 
 **2. Install backend dependencies**
+
 ```bash
 cd backend
 npm install
 ```
 
-**3. Start the server**
+**3. Configure environment variables**
+Create `backend/.env` with:
+
+```bash
+MONGODB_URI=mongodb://127.0.0.1:27017
+MONGODB_DB_NAME=roadfix
+PORT=3000
+```
+
+**4. Start the server**
+
 ```bash
 node server.js
 ```
 
-**4. Open the app**
+**5. Open the app**
 
 Navigate to [http://localhost:3000](http://localhost:3000) in your browser.
 
@@ -83,39 +96,41 @@ Navigate to [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## 🔌 API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/reports` | Fetch all reports (supports `?category=` & `?status=` filters) |
-| `POST` | `/api/reports` | Submit a new report (multipart/form-data with optional image) |
-| `PATCH` | `/api/reports/:id/status` | Update the status of a report |
-| `DELETE` | `/api/reports/:id` | Delete a report by ID |
-| `GET` | `/api/reports/stats` | Get report counts grouped by status |
+| Method   | Endpoint                  | Description                                                    |
+| -------- | ------------------------- | -------------------------------------------------------------- |
+| `GET`    | `/api/reports`            | Fetch all reports (supports `?category=` & `?status=` filters) |
+| `POST`   | `/api/reports`            | Submit a new report (multipart/form-data with optional image)  |
+| `PATCH`  | `/api/reports/:id/status` | Update the status of a report                                  |
+| `DELETE` | `/api/reports/:id`        | Delete a report by ID                                          |
+| `GET`    | `/api/reports/stats`      | Get report counts grouped by status                            |
 
 ---
 
 ## 📦 Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| **Frontend** | HTML5, Vanilla CSS, Vanilla JavaScript |
-| **Mapping** | [Leaflet.js](https://leafletjs.com/) + OpenStreetMap |
-| **Icons** | [Font Awesome 6](https://fontawesome.com/) |
-| **Fonts** | [Outfit](https://fonts.google.com/specimen/Outfit) (Google Fonts) |
-| **Backend** | [Node.js](https://nodejs.org/) + [Express.js](https://expressjs.com/) |
-| **File Uploads** | [Multer](https://github.com/expressjs/multer) |
-| **Data Storage** | JSON flat-file (`reports.txt`) — zero database setup |
+| Layer            | Technology                                                            |
+| ---------------- | --------------------------------------------------------------------- |
+| **Frontend**     | HTML5, Vanilla CSS, Vanilla JavaScript                                |
+| **Mapping**      | [Leaflet.js](https://leafletjs.com/) + OpenStreetMap                  |
+| **Icons**        | [Font Awesome 6](https://fontawesome.com/)                            |
+| **Fonts**        | [Outfit](https://fonts.google.com/specimen/Outfit) (Google Fonts)     |
+| **Backend**      | [Node.js](https://nodejs.org/) + [Express.js](https://expressjs.com/) |
+| **File Uploads** | [Multer](https://github.com/expressjs/multer)                         |
+| **Data Storage** | MongoDB (`reports`, `audit_logs`, `users`, `contact_messages`)        |
 
 ---
 
 ## 🖼️ Screenshots
 
 ### Report an Issue
+
 - Fill in the issue title, category, description, and nearest address
 - Attach a photo from your device
 - Click on the interactive map to pin the exact location
 - Submit — an animated success banner appears instantly with your Tracking ID
 
 ### Dashboard
+
 - See all submitted reports as cards with status badges
 - Filter by category or status
 - Update report status or delete reports inline
@@ -124,13 +139,18 @@ Navigate to [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## 📁 Environment & Configuration
 
-No `.env` file is required for local development. The server runs on **port 3000** by default.
+Create `backend/.env` and configure:
 
-To change the port, set the `PORT` environment variable before starting:
 ```bash
-PORT=5000 node server.js   # Linux/macOS
-$env:PORT=5000; node server.js  # Windows PowerShell
+MONGODB_URI=mongodb://127.0.0.1:27017
+MONGODB_DB_NAME=roadfix
+PORT=3000
 ```
+
+If `MONGODB_URI` or `MONGODB_DB_NAME` are omitted, defaults are used:
+
+- `MONGODB_URI`: `mongodb://127.0.0.1:27017`
+- `MONGODB_DB_NAME`: `roadfix`
 
 ---
 
@@ -153,8 +173,9 @@ This project is open source and available under the [MIT License](LICENSE).
 ## 👩‍💻 Author
 
 **Rashmi Joshi**
+
 - GitHub: [@Rashmijoshi18](https://github.com/Rashmijoshi18)
 
 ---
 
-> *RoadFix — Making roads safer, one report at a time.* 🛣️
+> _RoadFix — Making roads safer, one report at a time._ 🛣️
