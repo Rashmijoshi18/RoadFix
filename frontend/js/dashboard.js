@@ -340,8 +340,8 @@ function renderReports(reports) {
 
         // Status update options for all users
         statusSelectHTML = `
-            <div class="status-select-wrapper" style="margin-left:auto;">
-                <select class="update-status" data-id="${report.id}" style="padding:4px; border-radius:4px;">
+            <div class="status-select-wrapper">
+                <select class="update-status" data-id="${report.id}">
                     <option value="Reported" ${report.status === 'Reported' ? 'selected' : ''}>Reported</option>
                     <option value="Pending" ${displayStatus === 'Pending' ? 'selected' : ''}>Pending</option>
                     <option value="Resolved" ${displayStatus === 'Resolved' ? 'selected' : ''}>Resolved</option>
@@ -349,11 +349,11 @@ function renderReports(reports) {
             </div>
         `;
 
-        // Delete: admin
-        if (role === 'admin') {
+        // Delete: admin, inspector, or any user if Resolved
+        if (role === 'admin' || role === 'inspector' || displayStatus === 'Resolved') {
             deleteButtonHTML = `
-                <button class="btn-small btn-delete" data-id="${report.id}" title="Delete Report" style="margin-left:8px; padding:4px 8px; cursor:pointer;">
-                    <i class="fas fa-trash-alt"></i>
+                <button class="btn-small btn-delete" data-id="${report.id}" title="Delete Report">
+                    <i class="fas fa-trash-alt"></i> Delete
                 </button>
             `;
         }
@@ -365,27 +365,27 @@ function renderReports(reports) {
                     <span class="badge ${badgeClass}">${displayStatus}</span>
                 </div>
             </div>
-            <div class="report-content" style="padding:16px;">
-                <div class="report-title" style="font-weight:bold; font-size:1.1rem; margin-bottom:8px;">${escapeHTML(report.title)}</div>
+            <div class="report-content">
+                <div class="report-title">${escapeHTML(report.title)}</div>
                 
-                <div class="report-meta" style="font-size:0.85rem; color:#666; margin-bottom:12px; display:flex; gap:10px; flex-wrap:wrap;">
-                    <span><i class="fas fa-map-marker-alt"></i> ${escapeHTML(report.address) || 'Location'}</span>
-                    <span><i class="far fa-calendar-alt"></i> ${dateStr}</span>
-                    <span><i class="fas fa-tag"></i> ${escapeHTML(report.category)}</span>
+                <div class="report-meta">
+                    <div class="report-meta-item"><i class="fas fa-map-marker-alt"></i> ${escapeHTML(report.address) || 'Location'}</div>
+                    <div class="report-meta-item"><i class="far fa-calendar-alt"></i> ${dateStr}</div>
+                    <div class="report-meta-item"><i class="fas fa-tag"></i> ${escapeHTML(report.category)}</div>
                 </div>
                 
                 ${slaHTML}
 
-                <div class="report-desc" style="font-size:0.95rem; margin-bottom:12px;">
+                <div class="report-desc">
                     ${escapeHTML(report.description) || '<i>No description</i>'}
                 </div>
                 
                 ${report.solution ? `
-                <div class="report-solution" style="background:#e8f5e9; padding:8px; border-radius:4px; margin-bottom:12px; font-size:0.9rem;">
+                <div class="report-solution">
                     <strong><i class="fas fa-check-circle"></i> Resolution:</strong> ${escapeHTML(report.solution)}
                 </div>` : ''}
                 
-                <div class="report-actions" style="display:flex; align-items:center; border-top:1px solid #eee; padding-top:12px; margin-top:12px;">
+                <div class="report-actions">
                     <button class="btn-upvote ${upvoteClass}" data-id="${report.id}">
                         <i class="fas fa-arrow-up"></i>
                         <span id="upvote-count-${report.id}">${dbUpvotedCount}</span>
