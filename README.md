@@ -94,6 +94,50 @@ Navigate to [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
+## ▲ Deploy Backend on Vercel
+
+This repository is configured so `/api/*` routes run as a Vercel Serverless Function via `api/index.js`.
+
+### 1. Push your code to GitHub
+
+Ensure your latest backend changes are committed and pushed.
+
+### 2. Import the project in Vercel
+
+- In Vercel Dashboard, click **Add New Project**.
+- Select your `RoadFix` repository.
+- Keep the **Root Directory** as the repository root.
+
+### 3. Set environment variables in Vercel
+
+Add the following in **Project Settings → Environment Variables**:
+
+- `MONGODB_URI`
+- `MONGODB_DB_NAME`
+
+### 4. Deploy
+
+Click **Deploy**. Vercel will build and expose:
+
+- `https://<your-project>.vercel.app/api/auth/*`
+- `https://<your-project>.vercel.app/api/reports/*`
+- `https://<your-project>.vercel.app/api/contact/*`
+- `https://<your-project>.vercel.app/api/audit/*`
+
+### 5. Verify health quickly
+
+Open:
+
+- `https://<your-project>.vercel.app/api/reports/stats`
+
+If MongoDB is configured correctly, it should return JSON.
+
+### Important note about uploads on Vercel
+
+Vercel serverless filesystem is ephemeral. Uploaded files can be written temporarily during execution but are not permanently persisted between invocations/deploys. For production-grade persistent media, use object storage (for example Cloudinary, S3, or Vercel Blob).
+
+---
+
 ## 🔌 API Endpoints
 
 | Method   | Endpoint                  | Description                                                    |
