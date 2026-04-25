@@ -19,12 +19,14 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     />
   </head>
+
   <body>
     <nav class="navbar">
       <div class="container nav-container">
-        <a href="index.html" class="logo"
-          ><i class="fas fa-road"></i> RoadFix</a
-        >
+        <a href="index.html" class="logo">
+          <i class="fas fa-road"></i> RoadFix
+        </a>
+
         <div class="nav-right">
           <ul class="nav-links">
             <li><a href="index.html">Home</a></li>
@@ -37,7 +39,9 @@
               <a href="audit.html">Audit Log</a>
             </li>
           </ul>
+
           <div class="nav-user-info" id="navUserInfo"></div>
+
           <button
             class="theme-toggle"
             onclick="toggleTheme()"
@@ -48,6 +52,7 @@
         </div>
       </div>
     </nav>
+
     <section class="info-hero">
       <div class="container">
         <h1>Get in <span>Touch</span></h1>
@@ -60,6 +65,7 @@
 
     <main class="container info-main">
       <section class="contact-wrapper">
+        <!-- FORM -->
         <article class="form-container contact-form-card">
           <div
             id="contactSuccess"
@@ -76,10 +82,10 @@
 
           <form id="contactForm">
             <div class="form-group">
-              <label for="contactName"
-                ><i class="fas fa-user"></i> Your Name
-                <span class="required">*</span></label
-              >
+              <label for="contactName">
+                <i class="fas fa-user"></i> Your Name
+                <span class="required">*</span>
+              </label>
               <input
                 type="text"
                 id="contactName"
@@ -89,11 +95,12 @@
                 maxlength="100"
               />
             </div>
+
             <div class="form-group">
-              <label for="contactEmail"
-                ><i class="fas fa-envelope"></i> Email Address
-                <span class="required">*</span></label
-              >
+              <label for="contactEmail">
+                <i class="fas fa-envelope"></i> Email Address
+                <span class="required">*</span>
+              </label>
               <input
                 type="email"
                 id="contactEmail"
@@ -103,11 +110,12 @@
                 maxlength="150"
               />
             </div>
+
             <div class="form-group">
-              <label for="contactSubject"
-                ><i class="fas fa-pen"></i> Subject
-                <span class="required">*</span></label
-              >
+              <label for="contactSubject">
+                <i class="fas fa-pen"></i> Subject
+                <span class="required">*</span>
+              </label>
               <input
                 type="text"
                 id="contactSubject"
@@ -117,11 +125,12 @@
                 maxlength="150"
               />
             </div>
+
             <div class="form-group">
-              <label for="contactMessage"
-                ><i class="fas fa-comment-dots"></i> Message
-                <span class="required">*</span></label
-              >
+              <label for="contactMessage">
+                <i class="fas fa-comment-dots"></i> Message
+                <span class="required">*</span>
+              </label>
               <textarea
                 id="contactMessage"
                 name="message"
@@ -131,14 +140,18 @@
                 maxlength="1500"
               ></textarea>
             </div>
+
             <div id="contactError" class="message error hidden"></div>
+
             <button type="submit" class="btn btn-primary" id="contactSubmitBtn">
               <i class="fas fa-paper-plane"></i> Send Message
             </button>
           </form>
         </article>
 
+        <!-- INFO BOXES -->
         <aside class="contact-info-boxes">
+          <!-- Email -->
           <article class="contact-box">
             <div class="contact-box-icon">
               <i class="fas fa-envelope-open-text"></i>
@@ -149,14 +162,32 @@
               <p>Typical response within 24 hours.</p>
             </div>
           </article>
+
+          <!-- Support Hours -->
           <article class="contact-box">
-            <div class="contact-box-icon"><i class="fas fa-clock"></i></div>
+            <div class="contact-box-icon">
+              <i class="fas fa-clock"></i>
+            </div>
             <div class="contact-box-details">
               <h3>Support Hours</h3>
               <p>Mon - Fri: 9:00 AM to 6:00 PM</p>
               <p>Sat: 10:00 AM to 2:00 PM</p>
             </div>
           </article>
+
+          <!-- NEW Contact Hours -->
+          <article class="contact-box">
+            <div class="contact-box-icon">
+              <i class="fas fa-calendar-days"></i>
+            </div>
+            <div class="contact-box-details">
+              <h3>Contact Hours</h3>
+              <p>Monday - Sunday: 8:00 AM to 8:00 PM</p>
+              <p>Available for general inquiries</p>
+            </div>
+          </article>
+
+          <!-- Before Contact -->
           <article class="contact-box">
             <div class="contact-box-icon">
               <i class="fas fa-circle-info"></i>
@@ -167,7 +198,6 @@
                 For status updates, check your active reports on the Dashboard
                 first.
               </p>
-              <a href="dashboard.html">Open Dashboard</a>
             </div>
           </article>
         </aside>
@@ -175,6 +205,7 @@
     </main>
 
     <div id="toast-container" class="toast-container"></div>
+
     <script src="js/toast.js"></script>
     <script src="js/main.js"></script>
     <script src="js/pageAuth.js"></script>
