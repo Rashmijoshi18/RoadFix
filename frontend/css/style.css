@@ -2479,6 +2479,61 @@ input[type="password"]:focus {
     }
 }
 
+/* REGISTER PAGE ALIGNMENT */
+.register-page {
+    min-height: calc(100vh - 5rem);
+    padding: clamp(1.4rem, 3vw, 2.6rem) 0 2rem;
+}
+
+.register-wrapper {
+    width: min(560px, calc(100% - 2rem));
+    margin: 0 auto;
+}
+
+.register-page .login-card {
+    margin: 0;
+    height: auto;
+}
+
+.register-page .login-header {
+    text-align: center;
+}
+
+.register-page .login-icon-circle {
+    margin: 0 auto 0.75rem;
+}
+
+.register-page .login-header h1 {
+    font-size: clamp(1.85rem, 4vw, 2.2rem);
+    margin-bottom: 0.35rem;
+}
+
+.register-page .login-header p {
+    color: var(--text-secondary);
+}
+
+.register-redirect-text {
+    text-align: center;
+    margin-top: 1rem;
+    color: var(--text-muted);
+}
+
+.register-redirect-text a {
+    font-weight: 600;
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.register-redirect-text a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 576px) {
+    .register-wrapper {
+        width: calc(100% - 1rem);
+    }
+}
+
 /* UPVOTE BUTTON */
 .btn-upvote {
   display: flex;
