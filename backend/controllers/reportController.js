@@ -1,4 +1,6 @@
 const { ObjectId } = require('mongodb');
+const fs = require('fs');
+const path = require('path');
 const { getCollection } = require('../db/mongoClient');
 const { appendAuditLog } = require('../db/auditDatabase');
 
@@ -55,7 +57,17 @@ const createReport = async (req, res) => {
     }
 
     if (req.file) {
-        image_url = `/uploads/${req.file.filename}`;
+        if (process.env.VERCEL) {
+            // Vercel filesystem is ephemeral, so keep image content with the report.
+            image_url = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+        } else {
+            const uploadDir = req.app?.locals?.uploadDir || path.join(__dirname, '../uploads');
+            const ext = path.extname(req.file.originalname || '') || '.jpg';
+            const filename = `${req.file.fieldname}-${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
+            const filePath = path.join(uploadDir, filename);
+            fs.writeFileSync(filePath, req.file.buffer);
+            image_url = `/uploads/${filename}`;
+        }
     }
 
     try {

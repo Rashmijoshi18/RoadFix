@@ -360,7 +360,7 @@ function renderReports(reports) {
 
         card.innerHTML = `
             <div class="report-img-wrapper">
-                <img src="${imageUrl}" alt="Report" class="report-img">
+                <img src="${imageUrl}" alt="Report" class="report-img" onerror="this.onerror=null;this.src='${PLACEHOLDER}'">
                 <div class="badge-position">
                     <span class="badge ${badgeClass}">${displayStatus}</span>
                 </div>
