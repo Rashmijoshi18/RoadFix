@@ -38,15 +38,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const categorySelect = document.getElementById('filterCategory');
     const statusSelect = document.getElementById('filterStatus');
-    const searchInput = document.getElementById('searchReports');
     const sortSelect = document.getElementById('sortReports');
     const clearBtn = document.getElementById('clearFilters');
 
     if (categorySelect) categorySelect.addEventListener('change', fetchReports);
     if (statusSelect) statusSelect.addEventListener('change', fetchReports);
-    if (searchInput) searchInput.addEventListener('input', applyClientFiltersAndRender);
     if (sortSelect) sortSelect.addEventListener('change', applyClientFiltersAndRender);
     if (clearBtn) clearBtn.addEventListener('click', clearDashboardFilters);
+
+    const toggleGuideBtn = document.getElementById('toggleGuide');
+    if (toggleGuideBtn) {
+        toggleGuideBtn.addEventListener('click', () => {
+            const helpSection = document.getElementById('dashboardHelp');
+            if (helpSection) {
+                helpSection.classList.toggle('collapsed');
+                const icon = toggleGuideBtn.querySelector('i');
+                if (helpSection.classList.contains('collapsed')) {
+                    icon.className = 'fas fa-question-circle';
+                } else {
+                    icon.className = 'fas fa-times-circle';
+                }
+            }
+        });
+    }
 });
 
 function clearDashboardFilters() {
@@ -57,18 +71,15 @@ function clearDashboardFilters() {
 
     if (categorySelect) categorySelect.value = '';
     if (statusSelect) statusSelect.value = '';
-    if (searchInput) searchInput.value = '';
     if (sortSelect) sortSelect.value = 'newest';
 
     fetchReports();
 }
 
 function applyClientFiltersAndRender() {
-    const searchInput = document.getElementById('searchReports');
     const sortSelect = document.getElementById('sortReports');
     const statusSelect = document.getElementById('filterStatus');
 
-    const term = (searchInput && searchInput.value ? searchInput.value : '').trim().toLowerCase();
     const sortBy = sortSelect ? sortSelect.value : 'newest';
     const selectedStatus = statusSelect ? statusSelect.value : '';
 
@@ -82,15 +93,7 @@ function applyClientFiltersAndRender() {
         reports = reports.filter(r => normalizeStatus(r.status) === selectedStatus);
     }
 
-    if (term) {
-        reports = reports.filter((r) => {
-            const searchable = [r.title, r.description, r.address, r.category, r.status, String(r.id || '')]
-                .filter(Boolean)
-                .join(' ')
-                .toLowerCase();
-            return searchable.includes(term);
-        });
-    }
+    updateResultsMeta(reports.length, currentServerReports.length);
 
     reports.sort((a, b) => {
         if (sortBy === 'oldest') {
@@ -120,18 +123,12 @@ function applyClientFiltersAndRender() {
         return new Date(b.createdAt) - new Date(a.createdAt);
     });
 
-    updateResultsMeta(reports.length, currentServerReports.length, term);
     renderReports(reports);
 }
 
-function updateResultsMeta(visibleCount, baseCount, term) {
+function updateResultsMeta(visibleCount, baseCount) {
     const meta = document.getElementById('resultsMeta');
     if (!meta) return;
-
-    if (term) {
-        meta.innerHTML = `<i class="fas fa-list"></i> Showing <strong>${visibleCount}</strong> of <strong>${baseCount}</strong> reports for "${escapeHTML(term)}"`;
-        return;
-    }
 
     meta.innerHTML = `<i class="fas fa-list"></i> Showing <strong>${visibleCount}</strong> reports`;
 }
@@ -541,18 +538,31 @@ function renderStats(statsArray) {
     const resolved = statsMap['Resolved'] || 0;
     const pending = (statsMap['Pending'] || 0) + (statsMap['In Progress'] || 0);
 
+    const currentStatus = document.getElementById('filterStatus') ? document.getElementById('filterStatus').value : '';
+
     container.innerHTML = `
-        <div class="stat-card">
+        <div class="stat-card ${!currentStatus ? 'active' : ''}" data-filter="">
             <div class="stat-value">${total}</div>
             <div class="stat-label">Total Reports</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card ${currentStatus === 'Resolved' ? 'active' : ''}" data-filter="Resolved">
             <div class="stat-value" style="color: var(--success);">${resolved}</div>
             <div class="stat-label">Issues Resolved</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card ${currentStatus === 'Pending' ? 'active' : ''}" data-filter="Pending">
             <div class="stat-value" style="color: var(--warning);">${pending}</div>
             <div class="stat-label">Pending Issues</div>
         </div>
     `;
+
+    // Add click listeners for interactive filtering
+    container.querySelectorAll('.stat-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const statusSelect = document.getElementById('filterStatus');
+            if (statusSelect) {
+                statusSelect.value = card.getAttribute('data-filter');
+                statusSelect.dispatchEvent(new Event('change'));
+            }
+        });
+    });
 }
