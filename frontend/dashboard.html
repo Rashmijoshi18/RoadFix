@@ -126,18 +126,7 @@
       </section>
 
       <section class="dashboard-controls" aria-label="Dashboard controls">
-        <div class="control-row main-row">
-          <div class="action-group">
-            <a href="report.html" class="btn btn-primary btn-sm">
-              <i class="fas fa-plus"></i> New Report
-            </a>
-            <button id="clearFilters" class="btn-icon" title="Clear Filters">
-              <i class="fas fa-rotate-left"></i>
-            </button>
-          </div>
-        </div>
-
-        <div class="control-row filter-row">
+        <div class="filter-group">
           <div class="filter-item">
             <label for="filterCategory"><i class="fas fa-filter"></i></label>
             <select id="filterCategory">
@@ -160,7 +149,9 @@
             </select>
           </div>
           <div class="filter-item">
-            <label for="sortReports"><i class="fas fa-sort-amount-down"></i></label>
+            <label for="sortReports"
+              ><i class="fas fa-sort-amount-down"></i
+            ></label>
             <select id="sortReports">
               <option value="newest">Newest First</option>
               <option value="oldest">Oldest First</option>
@@ -168,6 +159,15 @@
               <option value="sla">SLA Priority</option>
             </select>
           </div>
+        </div>
+
+        <div class="action-group">
+          <a href="report.html" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus"></i> New Report
+          </a>
+          <button id="clearFilters" class="btn-icon" title="Clear Filters">
+            <i class="fas fa-rotate-left"></i>
+          </button>
         </div>
       </section>
 

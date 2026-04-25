@@ -622,23 +622,22 @@ input:focus, select:focus, textarea:focus {
     backdrop-filter: blur(20px);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    padding: 1.5rem;
+    padding: 1.25rem 1.5rem;
     margin-bottom: 2.5rem;
     display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-    box-shadow: var(--shadow-lg);
-}
-
-.control-row {
-    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
     align-items: center;
     gap: 1.5rem;
+    box-shadow: var(--shadow-lg);
     flex-wrap: wrap;
 }
 
-.main-row {
-    justify-content: flex-end;
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
 }
 
 
@@ -675,10 +674,6 @@ input:focus, select:focus, textarea:focus {
     background: var(--danger-bg);
 }
 
-.filter-row {
-    border-top: 1px solid var(--border);
-    padding-top: 1.25rem;
-}
 
 .filter-item {
     display: flex;
