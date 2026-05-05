@@ -47,7 +47,7 @@
               <i class="fas fa-shield-alt"></i>
             </div>
             <h1>Welcome to RoadFix</h1>
-            <p>Sign in to your account</p>
+            <p>Sign in to your account to report and manage road issues</p>
           </div>
 
           <form id="loginForm" autocomplete="off">
@@ -95,101 +95,16 @@
               <i class="fas fa-sign-in-alt"></i> Sign In
             </button>
 
-            <p class="register-redirect-text">
-              New here?
-              <a href="register.html">Create an account</a>
-            </p>
+            <div class="login-footer">
+              <p class="register-redirect-text">
+                New here?
+                <a href="register.html">Create an account</a>
+              </p>
+              <p class="forgot-password-text">
+                <a href="#">Forgot your password?</a>
+              </p>
+            </div>
           </form>
-        </div>
-
-        <!-- Demo Credentials Card -->
-        <div class="demo-credentials-card">
-          <div class="demo-credentials-header">
-            <i class="fas fa-flask"></i>
-            <h3>Demo Credentials</h3>
-            <p>Click any card to auto-fill login</p>
-          </div>
-
-          <div class="demo-users-list">
-            <button
-              type="button"
-              class="demo-user-item"
-              data-email="admin@roadfix.com"
-              data-password="admin123"
-            >
-              <div class="demo-user-avatar admin-avatar">
-                <i class="fas fa-crown"></i>
-              </div>
-              <div class="demo-user-info">
-                <span class="demo-user-name">Alice</span>
-                <span class="demo-user-email">admin@roadfix.com</span>
-              </div>
-              <span class="role-badge role-admin">Admin</span>
-            </button>
-
-            <button
-              type="button"
-              class="demo-user-item"
-              data-email="inspector@roadfix.com"
-              data-password="inspect123"
-            >
-              <div class="demo-user-avatar inspector-avatar">
-                <i class="fas fa-hard-hat"></i>
-              </div>
-              <div class="demo-user-info">
-                <span class="demo-user-name">Raj Kumar</span>
-                <span class="demo-user-email">inspector@roadfix.com</span>
-              </div>
-              <span class="role-badge role-inspector">Inspector</span>
-            </button>
-
-            <button
-              type="button"
-              class="demo-user-item"
-              data-email="citizen@roadfix.com"
-              data-password="citizen123"
-            >
-              <div class="demo-user-avatar citizen-avatar">
-                <i class="fas fa-user"></i>
-              </div>
-              <div class="demo-user-info">
-                <span class="demo-user-name">Priya</span>
-                <span class="demo-user-email">citizen@roadfix.com</span>
-              </div>
-              <span class="role-badge role-citizen">Citizen</span>
-            </button>
-
-            <button
-              type="button"
-              class="demo-user-item"
-              data-email="nehaverma39@gmail.com"
-              data-password="rashmi123"
-            >
-              <div class="demo-user-avatar inspector-avatar">
-                <i class="fas fa-hard-hat"></i>
-              </div>
-              <div class="demo-user-info">
-                <span class="demo-user-name">Neha Verma</span>
-                <span class="demo-user-email">nehaverma39@gmail.com</span>
-              </div>
-              <span class="role-badge role-inspector">Citizen</span>
-            </button>
-            <button
-              type="button"
-              class="demo-user-item"
-              data-email="aman.gupta@gmail.com"
-              data-password="aman456"
-            >
-              <div class="demo-user-avatar admin-avatar">
-                <i class="fas fa-crown"></i>
-              </div>
-              <div class="demo-user-info">
-                <span class="demo-user-name">Aman Gupta</span>
-                <span class="demo-user-email">aman.gupta@gmail.com</span>
-              </div>
-              <span class="role-badge role-admin">Officer</span>
-            </button>
-          </div>
         </div>
       </div>
     </main>
@@ -207,20 +122,6 @@
         passwordInput.type = isPassword ? "text" : "password";
         passwordToggleIcon.classList.toggle("fa-eye", !isPassword);
         passwordToggleIcon.classList.toggle("fa-eye-slash", isPassword);
-      });
-
-      // ---- Demo user auto-fill ----
-      document.querySelectorAll(".demo-user-item").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          document.getElementById("loginEmail").value = btn.dataset.email;
-          document.getElementById("loginPassword").value = btn.dataset.password;
-
-          // Visual feedback
-          document
-            .querySelectorAll(".demo-user-item")
-            .forEach((b) => b.classList.remove("selected"));
-          btn.classList.add("selected");
-        });
       });
 
       // ---- Form submission ----
