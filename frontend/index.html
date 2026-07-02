@@ -1,186 +1,219 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RoadFix - Fix Your Roads, Empower Your Community</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="js/theme.js" defer></script>
-    <script src="js/main.js" defer></script>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RoadFix - Home</title>
+    <meta
+      name="description"
+      content="RoadFix helps citizens report road issues quickly and track resolution progress in real time."
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="js/theme.js"></script>
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+  <body>
     <nav class="navbar">
-        <div class="container nav-container">
-            <a href="index.html" class="logo"><i class="fas fa-road"></i> RoadFix</a>
-            <div class="nav-right">
-                <ul class="nav-links">
-                    <li><a href="index.html" class="active">Home</a></li>
-                    <li><a href="about.html">About</a></li>
-                    <li><a href="report.html">Report Issue</a></li>
-                    <li><a href="dashboard.html">Dashboard</a></li>
-                    <li><a href="faq.html">FAQ</a></li>
-                    <li><a href="contact.html">Contact</a></li>
-                </ul>
-                <button id="mobile-toggle" class="mobile-menu-btn" aria-label="Toggle Menu">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Theme">
-                    <i class="fas fa-moon" id="theme-icon"></i>
-                </button>
-            </div>
+      <div class="container nav-container">
+        <a href="index.html" class="logo"
+          ><i class="fas fa-road"></i> RoadFix</a
+        >
+        <div class="nav-right">
+          <ul class="nav-links">
+            <li><a href="index.html" class="active">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="report.html">Report Issue</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="faq.html">FAQ</a></li>
+            <li><a href="contact.html">Contact</a></li>
+            <li id="auditNavLink" style="display: none">
+              <a href="audit.html">Audit Log</a>
+            </li>
+          </ul>
+          <div class="nav-user-info" id="navUserInfo"></div>
+          <button
+            class="theme-toggle"
+            onclick="toggleTheme()"
+            aria-label="Toggle Theme"
+          >
+            <i class="fas fa-moon" id="theme-icon"></i>
+          </button>
         </div>
+      </div>
     </nav>
 
-    <header class="landing-hero">
-        <div class="container">
-            <h1 class="floating">Smarter Infrastructure. <span>Better Cities.</span></h1>
-            <p>RoadFix is the digital bridge between citizens and maintenance crews. Report potholes, broken lights, and road hazards in seconds.</p>
-            
-            <div class="hero-btns">
-                <a href="report.html" class="btn-premium">
-                    <i class="fas fa-plus-circle"></i> Report an Issue
-                </a>
-                <a href="dashboard.html" class="btn-premium-outline">
-                    <i class="fas fa-tachometer-alt"></i> View Dashboard
-                </a>
-            </div>
+    <script>
+      (function () {
+        const role = localStorage.getItem("userRole");
+        const name = localStorage.getItem("userName");
+        if (!role) {
+          window.location.href = "login.html";
+          return;
+        }
 
-            <div class="hero-stats reveal">
-                <div class="hero-stat-item">
-                    <h3 id="statTotal">0</h3>
-                    <p>Issues Reported</p>
-                </div>
-                <div class="hero-stat-item">
-                    <h3 id="statFixed" style="color: var(--success);">0</h3>
-                    <p>Roads Fixed</p>
-                </div>
-                <div class="hero-stat-item">
-                    <h3 id="statUsers">5,200</h3>
-                    <p>Active Citizens</p>
-                </div>
-            </div>
+        if (role === "admin") {
+          const auditLink = document.getElementById("auditNavLink");
+          if (auditLink) auditLink.style.display = "block";
+        }
+
+        const info = document.getElementById("navUserInfo");
+        if (info) {
+          info.innerHTML = `
+                    <span class="role-badge role-${role}">${role.charAt(0).toUpperCase() + role.slice(1)}</span>
+                    <button class="btn-logout" onclick="handleLogout()" title="Logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                `;
+        }
+
+        window.handleLogout = async function () {
+          try {
+            await fetch("/api/auth/logout", {
+              method: "POST",
+              headers: {
+                "x-user-role": role || "unknown",
+                "x-user-id": localStorage.getItem("userId") || "unknown",
+                "x-user-name": name || "Unknown",
+              },
+            });
+          } catch (e) {
+            console.error("Logout error:", e);
+          }
+          localStorage.clear();
+          window.location.href = "login.html";
+        };
+      })();
+    </script>
+
+    <header class="landing-hero">
+      <div class="container">
+        <h1>Safer Roads Start With One Report.</h1>
+        <p>
+          RoadFix lets communities flag hazards, helps inspectors prioritize
+          work, and keeps everyone updated from report to resolution.
+        </p>
+        <div class="hero-btns">
+          <a class="btn-premium" href="report.html">
+            <i class="fas fa-location-dot"></i> Report an Issue
+          </a>
+          <a class="btn-premium-outline" href="dashboard.html">
+            <i class="fas fa-chart-line"></i> View Dashboard
+          </a>
         </div>
+
+        <div class="hero-stats home-stat-card">
+          <div class="hero-stat-item">
+            <h3 id="statTotal">0</h3>
+            <p>Total Reports</p>
+          </div>
+          <div class="hero-stat-item">
+            <h3 id="statFixed">0</h3>
+            <p>Resolved Issues</p>
+          </div>
+          <div class="hero-stat-item">
+            <h3 id="statUsers">0</h3>
+            <p>Active Citizens</p>
+          </div>
+        </div>
+      </div>
     </header>
 
     <main class="container">
-        <section class="step-section">
-            <h2 class="section-title reveal" style="justify-content: center; margin-bottom: 5rem;">How It Works</h2>
-            
-            <div class="process-container">
-                <div class="process-step reveal">
-                    <div class="step-badge">1</div>
-                    <div class="step-icon-wrapper">
-                        <i class="fas fa-eye"></i>
-                    </div>
-                    <h3>Spot an Issue</h3>
-                    <p>Identify a pothole or hazard on your daily route needing repair.</p>
-                </div>
+      <section
+        class="reveal home-section-title"
+        style="margin: 2rem 0 2.25rem; text-align: center"
+      >
+        <h2 class="section-title" style="justify-content: center">
+          How RoadFix Works
+        </h2>
+      </section>
 
-                <div class="step-connector reveal"></div>
+      <section class="process-container" style="margin-bottom: 5rem">
+        <article class="process-step reveal home-step-card">
+          <div class="step-icon-wrapper">
+            <span class="step-badge">1</span>
+            <i class="fas fa-bullseye"></i>
+          </div>
+          <h3>Submit</h3>
+          <p>
+            Create a detailed report with title, category, image, and exact map
+            location.
+          </p>
+        </article>
+        <div class="step-connector reveal"></div>
+        <article class="process-step reveal home-step-card">
+          <div class="step-icon-wrapper">
+            <span class="step-badge">2</span>
+            <i class="fas fa-clipboard-check"></i>
+          </div>
+          <h3>Review</h3>
+          <p>
+            Inspectors triage incoming issues and assign actions based on
+            severity and SLA.
+          </p>
+        </article>
+        <div class="step-connector reveal"></div>
+        <article class="process-step reveal home-step-card">
+          <div class="step-icon-wrapper">
+            <span class="step-badge">3</span>
+            <i class="fas fa-circle-check"></i>
+          </div>
+          <h3>Resolve</h3>
+          <p>
+            Progress is visible on the dashboard until work is marked complete
+            and verified.
+          </p>
+        </article>
+      </section>
 
-                <div class="process-step reveal">
-                    <div class="step-badge">2</div>
-                    <div class="step-icon-wrapper">
-                        <i class="fas fa-camera"></i>
-                    </div>
-                    <h3>Snap & Pin</h3>
-                    <p>Photo the issue and pin its location using real-time GPS tracking.</p>
-                </div>
-
-                <div class="step-connector reveal"></div>
-
-                <div class="process-step reveal">
-                    <div class="step-badge">3</div>
-                    <div class="step-icon-wrapper">
-                        <i class="fas fa-check-double"></i>
-                    </div>
-                    <h3>Track Fix</h3>
-                    <p>Monitor progress on the dashboard as crews resolve your report.</p>
-                </div>
-            </div>
-        </section>
-
-        <section class="cta-banner reveal">
-            <h2>Ready to improve your neighborhood?</h2>
-            <p style="color: var(--text-secondary); margin-bottom: 2.5rem; font-size: 1.25rem;">Join thousands of citizens helping to make our transit safer and smoother.</p>
-            <a href="report.html" class="btn-premium" style="width: auto;">
-                Get Started Now <i class="fas fa-arrow-right"></i>
-            </a>
-        </section>
+      <section class="cta-banner reveal home-cta-card">
+        <h2 style="font-size: 2.2rem; margin-bottom: 1rem">
+          See Something Unsafe?
+        </h2>
+        <p
+          style="
+            max-width: 680px;
+            margin: 0 auto 2rem;
+            color: var(--text-secondary);
+          "
+        >
+          The faster an issue is reported, the faster crews can respond. Help
+          make roads safer for everyone.
+        </p>
+        <a class="btn-premium" href="report.html">
+          <i class="fas fa-paper-plane"></i> Start a Report
+        </a>
+      </section>
     </main>
 
-    <footer style="padding: 4rem 0; border-top: 1px solid var(--border);">
-        <div class="container" style="text-align: center; color: var(--text-muted);">
-            <p>&copy; 2026 RoadFix Infrastructure Solutions. All rights reserved.</p>
-        </div>
-    </footer>
-
+    <script src="js/main.js"></script>
+    <script src="js/home.js"></script>
     <script>
-        // Scroll Reveal Logic
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const revealObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('revealed');
-                    
-                    // Specific logic for stats reveal
-                    if (entry.target.classList.contains('hero-stats')) {
-                        startStatsAnimation();
-                    }
-                }
+      (function () {
+        const reveals = document.querySelectorAll(".reveal");
+        if (!("IntersectionObserver" in window)) {
+          reveals.forEach((el) => el.classList.add("revealed"));
+          return;
+        }
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              entry.target.classList.add("revealed");
+              io.unobserve(entry.target);
             });
-        }, observerOptions);
-
-        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
-
-        // Enhanced Counter Animation
-        function animateValue(obj, start, end, duration) {
-            if (start === end) {
-                obj.innerText = end.toLocaleString();
-                return;
-            }
-            let startTimestamp = null;
-            const step = (timestamp) => {
-                if (!startTimestamp) startTimestamp = timestamp;
-                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                const value = Math.floor(progress * (end - start) + start);
-                obj.innerText = value.toLocaleString();
-                if (progress < 1) {
-                    window.requestAnimationFrame(step);
-                }
-            };
-            window.requestAnimationFrame(step);
-        }
-
-        let statsAnimated = false;
-        async function startStatsAnimation() {
-            if (statsAnimated) return;
-            statsAnimated = true;
-
-            try {
-                const res = await fetch('/api/reports/stats');
-                const json = await res.json();
-                const stats = json.data;
-                const total = stats.reduce((acc, s) => acc + s.count, 0) || 1240;
-                const fixed = stats.find(s => s.status === 'Resolved')?.count || 856;
-                
-                animateValue(document.getElementById('statTotal'), 0, total, 2000);
-                animateValue(document.getElementById('statFixed'), 0, fixed, 2000);
-                // Users is static for now
-                animateValue(document.getElementById('statUsers'), 4000, 5200, 2000);
-            } catch (err) {
-                console.log('Using default stats fallback');
-                animateValue(document.getElementById('statTotal'), 0, 1240, 2000);
-                animateValue(document.getElementById('statFixed'), 0, 856, 2000);
-                animateValue(document.getElementById('statUsers'), 4000, 5200, 2000);
-            }
-        }
+          },
+          { threshold: 0.15 },
+        );
+        reveals.forEach((el) => io.observe(el));
+      })();
     </script>
-</body>
+  </body>
 </html>

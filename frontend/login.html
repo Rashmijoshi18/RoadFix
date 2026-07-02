@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -285,4 +286,208 @@
         }
     </script>
 </body>
+=======
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - RoadFix</title>
+    <meta
+      name="description"
+      content="Sign in to RoadFix to report road issues, manage inspections, or access the admin dashboard."
+    />
+    <!-- Outfit Font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="js/theme.js"></script>
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="container nav-container">
+        <a href="login.html" class="logo"
+          ><i class="fas fa-road"></i> RoadFix</a
+        >
+        <div class="nav-right">
+          <button
+            class="theme-toggle"
+            onclick="toggleTheme()"
+            aria-label="Toggle Theme"
+          >
+            <i class="fas fa-moon" id="theme-icon"></i>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <main class="login-page">
+      <div class="login-wrapper">
+        <!-- Login Card -->
+        <div class="login-card">
+          <div class="login-header">
+            <div class="login-icon-circle">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <h1>Welcome to RoadFix</h1>
+            <p>Sign in to your account to report and manage road issues</p>
+          </div>
+
+          <form id="loginForm" autocomplete="off">
+            <div class="form-group">
+              <label for="loginEmail"
+                ><i class="fas fa-envelope"></i> Email Address</label
+              >
+              <input
+                type="email"
+                id="loginEmail"
+                name="email"
+                required
+                placeholder="you@roadfix.com"
+                autocomplete="email"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="loginPassword"
+                ><i class="fas fa-lock"></i> Password</label
+              >
+              <div class="password-wrapper">
+                <input
+                  type="password"
+                  id="loginPassword"
+                  name="password"
+                  required
+                  placeholder="Enter your password"
+                  autocomplete="current-password"
+                />
+                <button
+                  type="button"
+                  class="password-toggle-btn"
+                  id="passwordToggleBtn"
+                  aria-label="Toggle password visibility"
+                >
+                  <i class="fas fa-eye" id="passwordToggleIcon"></i>
+                </button>
+              </div>
+            </div>
+
+            <div id="loginError" class="login-error hidden"></div>
+
+            <button type="submit" class="btn btn-primary" id="loginSubmitBtn">
+              <i class="fas fa-sign-in-alt"></i> Sign In
+            </button>
+
+            <div class="login-footer">
+              <p class="register-redirect-text">
+                New here?
+                <a href="register.html">Create an account</a>
+              </p>
+              <p class="forgot-password-text">
+                <a href="#">Forgot your password?</a>
+              </p>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script>
+      // ---- Password toggle ----
+      const passwordToggleBtn = document.getElementById("passwordToggleBtn");
+      const passwordInput = document.getElementById("loginPassword");
+      const passwordToggleIcon = document.getElementById("passwordToggleIcon");
+
+      passwordToggleBtn.addEventListener("click", () => {
+        const isPassword = passwordInput.type === "password";
+        passwordInput.type = isPassword ? "text" : "password";
+        passwordToggleIcon.classList.toggle("fa-eye", !isPassword);
+        passwordToggleIcon.classList.toggle("fa-eye-slash", isPassword);
+      });
+
+      // ---- Form submission ----
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const email = document.getElementById("loginEmail").value.trim();
+          const password = document.getElementById("loginPassword").value;
+          const errorBox = document.getElementById("loginError");
+          const submitBtn = document.getElementById("loginSubmitBtn");
+
+          // Reset error
+          errorBox.classList.add("hidden");
+          errorBox.textContent = "";
+
+          if (!email || !password) {
+            errorBox.textContent = "Please enter both email and password.";
+            errorBox.classList.remove("hidden");
+            return;
+          }
+
+          // Disable button
+          submitBtn.disabled = true;
+          submitBtn.innerHTML =
+            '<i class="fas fa-spinner fa-spin"></i> Signing in...';
+
+          try {
+            const response = await fetch("/api/auth/login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email, password }),
+            });
+
+            let result = null;
+            try {
+              result = await response.json();
+            } catch (parseErr) {
+              result = null;
+            }
+
+            if (response.ok && result && result.success) {
+              const user = result?.data?.user || result?.data;
+
+              if (!user || !user.role || !user.name || !user.id) {
+                throw new Error("Unexpected login response shape");
+              }
+
+              // Store user info in localStorage
+              localStorage.setItem("userRole", user.role);
+              localStorage.setItem("userName", user.name);
+              localStorage.setItem("userId", user.id);
+
+              // Redirect to main page
+              window.location.href = "index.html";
+            } else {
+              errorBox.textContent =
+                (result && result.error) ||
+                "Invalid credentials. Please try again.";
+              errorBox.classList.remove("hidden");
+            }
+          } catch (err) {
+            errorBox.textContent =
+              "Network error. Please ensure the server is running.";
+            errorBox.classList.remove("hidden");
+          } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In';
+          }
+        });
+
+      // ---- If already logged in, redirect ----
+      if (localStorage.getItem("userRole")) {
+        window.location.href = "index.html";
+      }
+    </script>
+  </body>
+>>>>>>> 492c98a3349cef3abaea08ac9a2055d8f7e42518
 </html>

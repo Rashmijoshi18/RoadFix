@@ -13,7 +13,26 @@ if (!fs.existsSync(dbPath)) {
 const readData = () => {
     try {
         const data = fs.readFileSync(dbPath, 'utf-8');
-        return data ? JSON.parse(data) : [];
+        let records = data ? JSON.parse(data) : [];
+        
+        let needsSave = false;
+        records = records.map(r => {
+            if (!r.createdAt) {
+                needsSave = true;
+                r.createdAt = r.created_at || new Date().toISOString();
+            }
+            if (!r.upvotedBy) {
+                needsSave = true;
+                r.upvotedBy = [];
+            }
+            return r;
+        });
+
+        if (needsSave) {
+            writeData(records);
+        }
+
+        return records;
     } catch (err) {
         console.error('Error reading from reports.txt:', err.message);
         return [];
@@ -62,18 +81,28 @@ const db = {
                 image_url: params[6],
                 status: 'Reported',
                 solution: null,
-                created_at: new Date().toISOString()
+                created_at: new Date().toISOString(),
+                createdAt: new Date().toISOString(),
+                upvotedBy: []
             };
             records.push(newRecord);
             writeData(records);
             callback.call({ lastID: newId }, null);
         } else if (query.includes('UPDATE')) {
-            const status = params[0];
             const id = params[params.length - 1];
-            const index = records.findIndex(r => r.id == id);
+            const index = records.findIndex(r => r.id.toString() === id.toString());
             if (index !== -1) {
-                records[index].status = status;
-                if (params.length === 3) records[index].solution = params[1];
+                const setClause = query.split(/SET/i)[1].split(/WHERE/i)[0];
+                const columns = setClause.split(',').map(c => c.trim().split('=')[0].trim());
+                
+                columns.forEach((col, idx) => {
+                    let val = params[idx];
+                    if (col === 'upvotedBy' && typeof val === 'string') {
+                        try { val = JSON.parse(val); } catch(e) { val = []; }
+                    }
+                    records[index][col] = val;
+                });
+
                 writeData(records);
                 callback.call({ changes: 1 }, null);
             } else {
