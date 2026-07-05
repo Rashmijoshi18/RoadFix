@@ -8,12 +8,12 @@
       href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <script src="js/theme.js"></script>
+    <script src="js/theme.js?v=1.0.1"></script>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
     />
-    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/style.css?v=1.0.1" />
   </head>
   <body class="premium-ui">
     <div class="mesh-bg"></div>
@@ -66,7 +66,30 @@
 
         const info = document.getElementById("navUserInfo");
         if (info) {
-          info.innerHTML = "";
+          info.innerHTML =
+            '<button class="btn-logout" id="logoutBtn" title="Logout" aria-label="Logout"><i class="fas fa-sign-out-alt"></i></button>';
+        }
+
+        window.handleLogout = async function () {
+          try {
+            await fetch("/api/auth/logout", {
+              method: "POST",
+              headers: {
+                "x-user-role": role || "unknown",
+                "x-user-id": localStorage.getItem("userId") || "unknown",
+                "x-user-name": name || "Unknown",
+              },
+            });
+          } catch (e) {
+            console.error("Logout error:", e);
+          }
+          localStorage.clear();
+          window.location.href = "login.html";
+        };
+
+        const logoutBtn = document.getElementById("logoutBtn");
+        if (logoutBtn) {
+          logoutBtn.addEventListener("click", window.handleLogout);
         }
       })();
     </script>
@@ -111,6 +134,14 @@
 
       <section class="dashboard-controls" aria-label="Dashboard controls">
         <div class="filter-group">
+          <div class="filter-item">
+            <label for="searchQuery"><i class="fas fa-search"></i></label>
+            <input
+              type="text"
+              id="searchQuery"
+              placeholder="Search reports..."
+            />
+          </div>
           <div class="filter-item">
             <label for="filterCategory"><i class="fas fa-filter"></i></label>
             <select id="filterCategory">
@@ -167,8 +198,10 @@
       </section>
     </main>
 
-    <script src="js/toast.js"></script>
-    <script src="js/sla.js"></script>
-    <script src="js/dashboard.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/toast.js?v=1.0.1"></script>
+    <script src="js/sla.js?v=1.0.1"></script>
+    <script src="js/main.js?v=1.0.1"></script>
+    <script src="js/dashboard.js?v=1.0.1"></script>
   </body>
 </html>

@@ -111,6 +111,11 @@ const createReport = async (req, res) => {
 };
 
 const updateReportStatus = async (req, res) => {
+    const actor = getActor(req);
+    if (actor.role !== 'admin' && actor.role !== 'inspector') {
+        return res.status(403).json({ error: 'Access denied. Only admins and inspectors can update report status.' });
+    }
+
     const { id } = req.params;
     const { status, solution } = req.body;
 

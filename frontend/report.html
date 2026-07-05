@@ -12,8 +12,8 @@
       href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <script src="js/theme.js"></script>
-    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/theme.js?v=1.0.1"></script>
+    <link rel="stylesheet" href="css/style.css?v=1.0.1" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
@@ -23,14 +23,6 @@
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     />
     <style>
-      #map {
-        height: 320px;
-        width: 100%;
-        border-radius: var(--radius-md);
-        border: 1px solid var(--border);
-        margin-bottom: 1rem;
-        z-index: 1;
-      }
       .map-hint {
         font-size: 0.85rem;
         color: var(--text-muted);
@@ -84,7 +76,30 @@
         }
         const info = document.getElementById("navUserInfo");
         if (info) {
-          info.innerHTML = "";
+          info.innerHTML =
+            '<button class="btn-logout" id="logoutBtn" title="Logout" aria-label="Logout"><i class="fas fa-sign-out-alt"></i></button>';
+        }
+
+        window.handleLogout = async function () {
+          try {
+            await fetch("/api/auth/logout", {
+              method: "POST",
+              headers: {
+                "x-user-role": role || "unknown",
+                "x-user-id": localStorage.getItem("userId") || "unknown",
+                "x-user-name": name || "Unknown",
+              },
+            });
+          } catch (e) {
+            console.error("Logout error:", e);
+          }
+          localStorage.clear();
+          window.location.href = "login.html";
+        };
+
+        const logoutBtn = document.getElementById("logoutBtn");
+        if (logoutBtn) {
+          logoutBtn.addEventListener("click", window.handleLogout);
         }
       })();
     </script>
@@ -103,31 +118,31 @@
         </div>
       </header>
 
-      <div
-        id="successBanner"
-        class="success-banner hidden"
-        style="margin-bottom: 2rem"
-      >
-        <div class="success-banner-icon">
-          <i class="fas fa-check-circle"></i>
-        </div>
-        <div class="success-banner-body">
-          <h3>Report Submitted! 🎉</h3>
-          <p id="successDetail">
-            Your issue has been logged and assigned a tracking ID.
-          </p>
-          <div class="success-banner-actions">
-            <button class="btn-success-report" onclick="resetToForm()">
-              <i class="fas fa-plus"></i> Submit Another
-            </button>
-            <a href="dashboard.html" class="btn-success-dashboard"
-              ><i class="fas fa-chart-bar"></i> View Dashboard</a
-            >
+      <section class="form-container" style="margin-top: 0;">
+        <div
+          id="successBanner"
+          class="success-banner hidden"
+          style="margin: 0;"
+        >
+          <div class="success-banner-icon">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <div class="success-banner-body">
+            <h3>Report Submitted! 🎉</h3>
+            <p id="successDetail">
+              Your issue has been logged and assigned a tracking ID.
+            </p>
+            <div class="success-banner-actions">
+              <button class="btn-success-report" onclick="resetToForm()">
+                <i class="fas fa-plus"></i> Submit Another
+              </button>
+              <a href="dashboard.html" class="btn-success-dashboard"
+                ><i class="fas fa-chart-bar"></i> View Dashboard</a
+              >
+            </div>
           </div>
         </div>
-      </div>
 
-      <section class="form-container">
         <form id="reportForm" enctype="multipart/form-data">
           <div class="form-group">
             <label for="title"
@@ -174,7 +189,9 @@
               ><i class="fas fa-map-marker-alt"></i> Pin Location
               <span class="required">*</span></label
             >
-            <div id="map"></div>
+            <div class="map-container">
+              <div id="map" style="height: 100%; width: 100%;"></div>
+            </div>
             <p class="map-hint">
               <i class="fas fa-info-circle"></i> Click on the map or drag the
               marker to set the exact location.
@@ -195,13 +212,21 @@
             />
           </div>
           <div class="form-group">
-            <label for="image"
+            <label
               ><i class="fas fa-camera"></i> Upload Photo
               <span style="color: var(--text-muted); font-weight: 400"
                 >(optional, max 5MB)</span
               ></label
             >
-            <input type="file" id="image" name="image" accept="image/*" />
+            <div class="file-upload-wrapper">
+              <input type="file" id="image" name="image" accept="image/*" />
+              <div class="file-upload-content" id="uploadPrompt">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <div class="file-upload-text">Drag and drop or click to upload</div>
+                <div class="file-upload-help">PNG, JPG, GIF up to 5MB</div>
+              </div>
+              <img id="imagePreview" alt="Image Preview" />
+            </div>
           </div>
           <div id="formMessage" class="message hidden"></div>
           <button
@@ -218,7 +243,8 @@
 
     <div id="toast-container" class="toast-container"></div>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="js/toast.js"></script>
-    <script src="js/app.js"></script>
+    <script src="js/toast.js?v=1.0.1"></script>
+    <script src="js/main.js?v=1.0.1"></script>
+    <script src="js/app.js?v=1.0.1"></script>
   </body>
 </html>

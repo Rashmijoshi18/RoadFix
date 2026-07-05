@@ -201,6 +201,28 @@ body::before {
     transform: rotate(15deg);
 }
 
+.btn-logout {
+    width: 2.5rem;
+    height: 2.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-logout:hover {
+    color: var(--danger);
+    border-color: var(--danger);
+    background: var(--danger-bg);
+    transform: translateY(-1px);
+}
+
 /* Hero Section */
 .hero {
     text-align: center;
@@ -376,6 +398,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 #imagePreview {
+    max-width: 100%;
     max-height: 180px;
     border-radius: var(--radius-sm);
     display: none;
@@ -506,6 +529,20 @@ input:focus, select:focus, textarea:focus {
     font-weight: 800;
     letter-spacing: -1px;
     color: var(--text-primary);
+}
+
+.dashboard-header h1 span {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.dashboard-welcome-line {
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    margin-top: 0.5rem;
+    font-weight: 500;
 }
 
 .btn-guide-toggle {
@@ -713,6 +750,23 @@ input:focus, select:focus, textarea:focus {
     outline: none !important;
 }
 
+.filter-item input[type="text"] {
+    border: none !important;
+    padding: 0 !important;
+    background: transparent !important;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    box-shadow: none !important;
+    transform: none !important;
+    outline: none !important;
+    width: 140px;
+}
+
+.filter-item input[type="text"]::placeholder {
+    color: var(--text-muted);
+}
+
 /* Dashboard Grid */
 .reports-grid {
     display: grid;
@@ -895,6 +949,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 .status-select-wrapper select {
+    width: 100%;
     padding: 0.6rem 2.5rem 0.6rem 1.25rem;
     background: var(--bg-solid);
     border-radius: var(--radius-full);
@@ -1992,6 +2047,10 @@ input:focus, select:focus, textarea:focus {
 
     .report-card {
         max-width: 100%;
+    }
+
+    .map-container {
+        height: 280px;
     }
 }
 

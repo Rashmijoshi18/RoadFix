@@ -17,6 +17,30 @@ document.addEventListener('DOMContentLoaded', () => {
     if (form) {
         form.addEventListener('submit', handleFormSubmit);
     }
+
+    // Image preview logic
+    const imageInput = document.getElementById('image');
+    const imagePreview = document.getElementById('imagePreview');
+    const uploadPrompt = document.getElementById('uploadPrompt');
+
+    if (imageInput && imagePreview && uploadPrompt) {
+        imageInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                    uploadPrompt.style.display = 'none';
+                }
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.src = '';
+                imagePreview.style.display = 'none';
+                uploadPrompt.style.display = 'block';
+            }
+        });
+    }
 });
 
 function initMap() {
@@ -57,6 +81,13 @@ function initMap() {
             }
         );
     }
+
+    // Redraw map on window resize
+    window.addEventListener('resize', () => {
+        if (map) {
+            map.invalidateSize();
+        }
+    });
 }
 
 function updateInputs(lat, lng) {
@@ -111,6 +142,13 @@ async function handleFormSubmit(e) {
 
             // Also reset the internal form data & map
             form.reset();
+            const imagePreviewEl = document.getElementById('imagePreview');
+            const uploadPromptEl = document.getElementById('uploadPrompt');
+            if (imagePreviewEl && uploadPromptEl) {
+                imagePreviewEl.src = '';
+                imagePreviewEl.style.display = 'none';
+                uploadPromptEl.style.display = 'block';
+            }
             if (marker && map) {
                 const center = map.getCenter();
                 marker.setLatLng(center);
@@ -132,9 +170,17 @@ async function handleFormSubmit(e) {
 window.resetToForm = function() {
     const banner = document.getElementById('successBanner');
     const form = document.getElementById('reportForm');
+    const imagePreview = document.getElementById('imagePreview');
+    const uploadPrompt = document.getElementById('uploadPrompt');
+
     if (banner) banner.classList.add('hidden');
     if (form) {
         form.style.display = '';
         form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    if (imagePreview && uploadPrompt) {
+        imagePreview.src = '';
+        imagePreview.style.display = 'none';
+        uploadPrompt.style.display = 'block';
     }
 };

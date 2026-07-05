@@ -54,11 +54,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusSelect = document.getElementById('filterStatus');
     const sortSelect = document.getElementById('sortReports');
     const clearBtn = document.getElementById('clearFilters');
+    const searchQueryInput = document.getElementById('searchQuery');
 
     if (categorySelect) categorySelect.addEventListener('change', fetchReports);
     if (statusSelect) statusSelect.addEventListener('change', fetchReports);
     if (sortSelect) sortSelect.addEventListener('change', applyClientFiltersAndRender);
     if (clearBtn) clearBtn.addEventListener('click', clearDashboardFilters);
+    if (searchQueryInput) searchQueryInput.addEventListener('input', applyClientFiltersAndRender);
 
     const toggleGuideBtn = document.getElementById('toggleGuide');
     if (toggleGuideBtn) {
@@ -81,10 +83,12 @@ function clearDashboardFilters() {
     const categorySelect = document.getElementById('filterCategory');
     const statusSelect = document.getElementById('filterStatus');
     const sortSelect = document.getElementById('sortReports');
+    const searchQueryInput = document.getElementById('searchQuery');
 
     if (categorySelect) categorySelect.value = '';
     if (statusSelect) statusSelect.value = '';
     if (sortSelect) sortSelect.value = 'newest';
+    if (searchQueryInput) searchQueryInput.value = '';
 
     fetchReports();
 }
@@ -92,9 +96,11 @@ function clearDashboardFilters() {
 function applyClientFiltersAndRender() {
     const sortSelect = document.getElementById('sortReports');
     const statusSelect = document.getElementById('filterStatus');
+    const searchQueryInput = document.getElementById('searchQuery');
 
     const sortBy = sortSelect ? sortSelect.value : 'newest';
     const selectedStatus = statusSelect ? statusSelect.value : '';
+    const query = searchQueryInput ? searchQueryInput.value.toLowerCase().trim() : '';
 
     let reports = [...currentServerReports];
 
@@ -104,6 +110,14 @@ function applyClientFiltersAndRender() {
         reports = reports.filter(r => ['Pending', 'In Progress'].includes(r.status));
     } else if (selectedStatus) {
         reports = reports.filter(r => normalizeStatus(r.status) === selectedStatus);
+    }
+
+    if (query) {
+        reports = reports.filter(r => 
+            (r.title && r.title.toLowerCase().includes(query)) ||
+            (r.description && r.description.toLowerCase().includes(query)) ||
+            (r.address && r.address.toLowerCase().includes(query))
+        );
     }
 
     updateResultsMeta(reports.length, currentServerReports.length);
@@ -206,14 +220,6 @@ function initSocket() {
 function setupRoleUI() {
     const role = getUserRole();
     const name = getUserName();
-
-    const headerDiv = document.querySelector('.dashboard-header > div');
-    if (headerDiv) {
-        const badgeHTML = `<span class="role-badge role-${role}" style="margin-bottom: 0.5rem; display: inline-block;">
-                <i class="fas fa-shield-alt"></i> ${role.charAt(0).toUpperCase() + role.slice(1)} View
-            </span>`;
-        headerDiv.insertAdjacentHTML('afterbegin', badgeHTML);
-    }
 
     const welcomeLine = document.getElementById('welcomeLine');
     if (welcomeLine) {
@@ -357,16 +363,24 @@ function renderReports(reports) {
         const isUpvoted = upvotedLocal.includes(report.id.toString());
         const upvoteClass = isUpvoted ? 'voted' : '';
 
-        // Status update options for all users
-        statusSelectHTML = `
-            <div class="status-select-wrapper">
-                <select class="update-status" data-id="${report.id}">
-                    <option value="Reported" ${report.status === 'Reported' ? 'selected' : ''}>Reported</option>
-                    <option value="Pending" ${displayStatus === 'Pending' ? 'selected' : ''}>Pending</option>
-                    <option value="Resolved" ${displayStatus === 'Resolved' ? 'selected' : ''}>Resolved</option>
-                </select>
-            </div>
-        `;
+        // Status update options: admin and inspector only
+        if (role === 'admin' || role === 'inspector') {
+            statusSelectHTML = `
+                <div class="status-select-wrapper">
+                    <select class="update-status" data-id="${report.id}">
+                        <option value="Reported" ${report.status === 'Reported' ? 'selected' : ''}>Reported</option>
+                        <option value="Pending" ${displayStatus === 'Pending' ? 'selected' : ''}>Pending</option>
+                        <option value="Resolved" ${displayStatus === 'Resolved' ? 'selected' : ''}>Resolved</option>
+                    </select>
+                </div>
+            `;
+        } else {
+            statusSelectHTML = `
+                <div class="status-read-only">
+                    <span class="badge ${badgeClass}">${displayStatus}</span>
+                </div>
+            `;
+        }
 
         // Delete: admin, inspector, or any user if Resolved
         if (role === 'admin' || role === 'inspector' || displayStatus === 'Resolved') {
@@ -564,16 +578,25 @@ function renderStats(statsArray) {
 
     container.innerHTML = `
         <div class="stat-card ${!currentStatus ? 'active' : ''}" data-filter="">
-            <div class="stat-value">${total}</div>
-            <div class="stat-label">Total Reports</div>
+            <div class="stat-icon total"><i class="fas fa-list"></i></div>
+            <div class="stat-details">
+                <h3>${total}</h3>
+                <p>Total Reports</p>
+            </div>
         </div>
         <div class="stat-card ${currentStatus === 'Resolved' ? 'active' : ''}" data-filter="Resolved">
-            <div class="stat-value" style="color: var(--success);">${resolved}</div>
-            <div class="stat-label">Issues Resolved</div>
+            <div class="stat-icon resolved"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-details">
+                <h3 style="color: var(--success);">${resolved}</h3>
+                <p>Issues Resolved</p>
+            </div>
         </div>
         <div class="stat-card ${currentStatus === 'Pending' ? 'active' : ''}" data-filter="Pending">
-            <div class="stat-value" style="color: var(--warning);">${pending}</div>
-            <div class="stat-label">Pending Issues</div>
+            <div class="stat-icon progress"><i class="fas fa-clock"></i></div>
+            <div class="stat-details">
+                <h3 style="color: var(--primary);">${pending}</h3>
+                <p>Pending Issues</p>
+            </div>
         </div>
     `;
 
