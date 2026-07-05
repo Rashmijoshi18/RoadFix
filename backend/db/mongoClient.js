@@ -44,9 +44,9 @@ async function seedDefaultUsers() {
     if (count > 0) return;
 
     const [adminHash, inspectorHash, citizenHash] = await Promise.all([
-        bcrypt.hash('admin123', 10),
-        bcrypt.hash('inspect123', 10),
-        bcrypt.hash('citizen123', 10)
+        bcrypt.hash('Admin@2026!', 10),
+        bcrypt.hash('Inspector@2026!', 10),
+        bcrypt.hash('Citizen@2026!', 10)
     ]);
 
     await users.insertMany([

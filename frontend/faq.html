@@ -107,24 +107,12 @@
           const a = document.getElementById("auditNavLink");
           if (a) a.style.display = "block";
         }
-        if (!role) {
-          window.location.href = "login.html";
-          return;
-        }
         const info = document.getElementById("navUserInfo");
         if (info) {
-          info.innerHTML = `<span class="role-badge role-${role}">${role.charAt(0).toUpperCase() + role.slice(1)}</span><button class="btn-logout" onclick="handleLogout()" title="Logout"><i class="fas fa-sign-out-alt"></i></button>`;
+          info.innerHTML = role
+            ? ""
+            : '<a href="login.html" class="btn btn-primary btn-small nav-auth-link">Sign In</a>';
         }
-        window.handleLogout = async function () {
-          try {
-            await fetch("/api/auth/logout", {
-              method: "POST",
-              headers: { "x-user-role": role, "x-user-name": name || "" },
-            });
-          } catch (e) {}
-          localStorage.clear();
-          window.location.href = "login.html";
-        };
       })();
     </script>
 

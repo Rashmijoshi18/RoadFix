@@ -84,22 +84,8 @@
         }
         const info = document.getElementById("navUserInfo");
         if (info) {
-          info.innerHTML = `<span class="role-badge role-${role}">${role.charAt(0).toUpperCase() + role.slice(1)}</span><button class="btn-logout" onclick="handleLogout()" title="Logout"><i class="fas fa-sign-out-alt"></i></button>`;
+          info.innerHTML = "";
         }
-        window.handleLogout = async function () {
-          try {
-            await fetch("/api/auth/logout", {
-              method: "POST",
-              headers: {
-                "x-user-role": role || "unknown",
-                "x-user-id": localStorage.getItem("userId") || "unknown",
-                "x-user-name": name || "Unknown",
-              },
-            });
-          } catch (e) {}
-          localStorage.clear();
-          window.location.href = "login.html";
-        };
       })();
     </script>
 

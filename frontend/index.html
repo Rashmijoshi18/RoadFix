@@ -53,11 +53,6 @@
       (function () {
         const role = localStorage.getItem("userRole");
         const name = localStorage.getItem("userName");
-        if (!role) {
-          window.location.href = "login.html";
-          return;
-        }
-
         if (role === "admin") {
           const auditLink = document.getElementById("auditNavLink");
           if (auditLink) auditLink.style.display = "block";
@@ -65,35 +60,16 @@
 
         const info = document.getElementById("navUserInfo");
         if (info) {
-          info.innerHTML = `
-                    <span class="role-badge role-${role}">${role.charAt(0).toUpperCase() + role.slice(1)}</span>
-                    <button class="btn-logout" onclick="handleLogout()" title="Logout">
-                        <i class="fas fa-sign-out-alt"></i>
-                    </button>
-                `;
+          info.innerHTML = role
+            ? ""
+            : '<a class="btn btn-primary btn-small nav-auth-link" href="login.html">Sign In</a>';
         }
-
-        window.handleLogout = async function () {
-          try {
-            await fetch("/api/auth/logout", {
-              method: "POST",
-              headers: {
-                "x-user-role": role || "unknown",
-                "x-user-id": localStorage.getItem("userId") || "unknown",
-                "x-user-name": name || "Unknown",
-              },
-            });
-          } catch (e) {
-            console.error("Logout error:", e);
-          }
-          localStorage.clear();
-          window.location.href = "login.html";
-        };
       })();
     </script>
 
     <header class="landing-hero">
       <div class="container">
+        <p class="hero-eyebrow">Civic issue reporting platform</p>
         <h1>Safer Roads Start With One Report.</h1>
         <p>
           RoadFix lets communities flag hazards, helps inspectors prioritize
@@ -119,7 +95,7 @@
           </div>
           <div class="hero-stat-item">
             <h3 id="statUsers">0</h3>
-            <p>Active Citizens</p>
+            <p>Active Users</p>
           </div>
         </div>
       </div>

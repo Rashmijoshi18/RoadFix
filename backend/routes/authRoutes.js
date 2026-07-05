@@ -5,6 +5,10 @@ const { getCollection } = require('../db/mongoClient');
 const { appendAuditLog } = require('../db/auditDatabase');
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PASSWORD_RULES = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
+
+const PASSWORD_RULES_MESSAGE =
+    'Password must be at least 8 characters and include letters, numbers, and special characters.';
 
 const sanitizeUser = (user) => {
     const { password, _id, ...userData } = user;
@@ -28,8 +32,8 @@ router.post('/login', async (req, res) => {
                 return res.status(400).json({ success: false, error: 'Please provide a valid email address' });
             }
 
-            if (password.length < 6) {
-                return res.status(400).json({ success: false, error: 'Password must be at least 6 characters long' });
+            if (!PASSWORD_RULES.test(password)) {
+                return res.status(400).json({ success: false, error: PASSWORD_RULES_MESSAGE });
             }
 
             const passwordHash = await bcrypt.hash(password, 10);
@@ -103,8 +107,8 @@ router.post('/register', async (req, res) => {
         return res.status(400).json({ success: false, error: 'Please provide a valid email address' });
     }
 
-    if (password.length < 6) {
-        return res.status(400).json({ success: false, error: 'Password must be at least 6 characters long' });
+    if (!PASSWORD_RULES.test(password)) {
+        return res.status(400).json({ success: false, error: PASSWORD_RULES_MESSAGE });
     }
 
     try {

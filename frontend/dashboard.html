@@ -66,30 +66,8 @@
 
         const info = document.getElementById("navUserInfo");
         if (info) {
-          info.innerHTML = `
-                    <span class="role-badge role-${role}">${role.charAt(0).toUpperCase() + role.slice(1)}</span>
-                    <button class="btn-logout" onclick="handleLogout()" title="Logout">
-                        <i class="fas fa-sign-out-alt"></i>
-                    </button>
-                `;
+          info.innerHTML = "";
         }
-
-        window.handleLogout = async function () {
-          try {
-            await fetch("/api/auth/logout", {
-              method: "POST",
-              headers: {
-                "x-user-role": role || "unknown",
-                "x-user-id": localStorage.getItem("userId") || "unknown",
-                "x-user-name": name || "Unknown",
-              },
-            });
-          } catch (e) {
-            console.error("Logout error:", e);
-          }
-          localStorage.clear();
-          window.location.href = "login.html";
-        };
       })();
     </script>
 
@@ -104,7 +82,11 @@
         </button>
       </header>
 
-      <section id="dashboardHelp" class="dashboard-help collapsed" aria-label="How to use dashboard">
+      <section
+        id="dashboardHelp"
+        class="dashboard-help collapsed"
+        aria-label="How to use dashboard"
+      >
         <div class="dashboard-help-grid">
           <article class="help-card">
             <h3>1. Find Issues Fast</h3>
@@ -116,7 +98,9 @@
           </article>
           <article class="help-card">
             <h3>3. Take Action</h3>
-            <p id="roleActionTip">Update and resolve reports based on your role.</p>
+            <p id="roleActionTip">
+              Update and resolve reports based on your role.
+            </p>
           </article>
         </div>
       </section>
@@ -183,7 +167,6 @@
       </section>
     </main>
 
-    <script src="/socket.io/socket.io.js"></script>
     <script src="js/toast.js"></script>
     <script src="js/sla.js"></script>
     <script src="js/dashboard.js"></script>

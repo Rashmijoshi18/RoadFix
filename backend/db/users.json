@@ -3,21 +3,21 @@
     "id": 1,
     "name": "Alice",
     "email": "admin@roadfix.com",
-    "password": "admin123",
+    "password": "Admin@2026!",
     "role": "admin"
   },
   {
     "id": 2,
     "name": "Raj Kumar",
     "email": "inspector@roadfix.com",
-    "password": "inspect123",
+    "password": "Inspector@2026!",
     "role": "inspector"
   },
   {
     "id": 3,
     "name": "Priya",
     "email": "citizen@roadfix.com",
-    "password": "citizen123",
+    "password": "Citizen@2026!",
     "role": "citizen"
   }
 ]

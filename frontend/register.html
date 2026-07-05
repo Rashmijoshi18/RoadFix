@@ -87,8 +87,8 @@
                   id="registerPassword"
                   name="password"
                   required
-                  minlength="6"
-                  placeholder="Minimum 6 characters"
+                  minlength="8"
+                  placeholder="8+ chars, letters, numbers & symbols"
                   autocomplete="new-password"
                 />
                 <button
@@ -103,6 +103,11 @@
             </div>
 
             <div id="registerError" class="login-error hidden"></div>
+
+            <p class="register-note">
+              Use a new email address to create an account. Passwords must be 8+
+              characters and include letters, numbers, and special characters.
+            </p>
 
             <button
               type="submit"
@@ -123,6 +128,50 @@
 
     <div id="toast-container" class="toast-container"></div>
 
+    <div
+      id="passwordRulesModal"
+      class="password-rules-modal hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="passwordRulesTitle"
+    >
+      <div class="password-rules-card">
+        <div class="password-rules-header">
+          <h2 id="passwordRulesTitle">Password Rules</h2>
+          <button
+            type="button"
+            id="passwordRulesCloseBtn"
+            class="password-rules-close"
+            aria-label="Close password rules popup"
+          >
+            <i class="fas fa-xmark"></i>
+          </button>
+        </div>
+
+        <p class="password-rules-summary">
+          Please use a password that meets all of these rules:
+        </p>
+        <ul class="password-rules-list">
+          <li>At least 8 characters long</li>
+          <li>Contains at least one letter</li>
+          <li>Contains at least one number</li>
+          <li>
+            Contains at least one special character, such as
+            <span class="password-rules-code">@</span> or
+            <span class="password-rules-code">!</span>
+          </li>
+        </ul>
+
+        <button
+          type="button"
+          id="passwordRulesOkBtn"
+          class="btn btn-primary btn-block password-rules-ok"
+        >
+          Got it
+        </button>
+      </div>
+    </div>
+
     <script>
       const registerPasswordToggleBtn = document.getElementById(
         "registerPasswordToggleBtn",
@@ -131,12 +180,32 @@
       const registerPasswordToggleIcon = document.getElementById(
         "registerPasswordToggleIcon",
       );
+      const passwordRulesModal = document.getElementById("passwordRulesModal");
+      const passwordRulesCloseBtn = document.getElementById(
+        "passwordRulesCloseBtn",
+      );
+      const passwordRulesOkBtn = document.getElementById("passwordRulesOkBtn");
+
+      const openPasswordRules = () => {
+        passwordRulesModal.classList.remove("hidden");
+      };
+
+      const closePasswordRules = () => {
+        passwordRulesModal.classList.add("hidden");
+      };
 
       registerPasswordToggleBtn.addEventListener("click", () => {
         const isPassword = registerPasswordInput.type === "password";
         registerPasswordInput.type = isPassword ? "text" : "password";
         registerPasswordToggleIcon.classList.toggle("fa-eye", !isPassword);
         registerPasswordToggleIcon.classList.toggle("fa-eye-slash", isPassword);
+      });
+
+      passwordRulesCloseBtn.addEventListener("click", closePasswordRules);
+      passwordRulesOkBtn.addEventListener("click", closePasswordRules);
+
+      passwordRulesModal.addEventListener("click", (event) => {
+        if (event.target === passwordRulesModal) closePasswordRules();
       });
 
       document
@@ -163,9 +232,16 @@
             return;
           }
 
-          if (password.length < 6) {
-            errorBox.textContent = "Password must be at least 6 characters.";
-            errorBox.classList.remove("hidden");
+          const passwordIsStrong =
+            password.length >= 8 &&
+            /[A-Za-z]/.test(password) &&
+            /\d/.test(password) &&
+            /[^A-Za-z\d]/.test(password);
+
+          if (!passwordIsStrong) {
+            errorBox.textContent = "";
+            errorBox.classList.add("hidden");
+            openPasswordRules();
             return;
           }
 
@@ -183,6 +259,20 @@
             const result = await response.json();
 
             if (!response.ok || !result.success) {
+              if (response.status === 409) {
+                throw new Error(
+                  "Account already exists for this email. Use a new email address or sign in on the login page.",
+                );
+              }
+
+              if (
+                response.status === 400 &&
+                result.error &&
+                result.error.toLowerCase().includes("password")
+              ) {
+                openPasswordRules();
+              }
+
               throw new Error(result.error || "Failed to create account.");
             }
 

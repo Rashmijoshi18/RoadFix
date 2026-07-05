@@ -1636,9 +1636,9 @@ input:focus, select:focus, textarea:focus {
 }
 
 @media (max-width: 768px) {
-    .hero-stats { 
-        flex-direction: column; 
-        gap: 2.5rem; 
+    .hero-stats {
+        flex-direction: column;
+        gap: 2.5rem;
         padding: 2rem;
         margin-top: 4rem;
     }
@@ -1826,6 +1826,49 @@ input:focus, select:focus, textarea:focus {
     pointer-events: none;
 }
 
+@media (max-width: 992px) {
+    .process-container {
+        flex-direction: column;
+        gap: 3rem;
+    }
+
+    .step-connector {
+        display: none;
+    }
+
+    .process-step {
+        width: 100%;
+    }
+
+    .landing-hero h1 { font-size: 4rem; }
+}
+
+@media (max-width: 768px) {
+    .landing-hero { padding: 7rem 1rem 5rem; }
+    .landing-hero h1 { font-size: 3rem; letter-spacing: -1.5px; }
+    .landing-hero p { font-size: 1.25rem; margin-bottom: 2.5rem; }
+    .hero-btns {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .hero-btns a {
+        width: 100%;
+        justify-content: center;
+    }
+    .hero-stats {
+        flex-direction: column;
+        gap: 2.5rem;
+        padding: 2rem;
+        margin-top: 4rem;
+    }
+    .hero-stat-item h3 { font-size: 2.5rem; }
+}
+
+@media (max-width: 480px) {
+    .landing-hero h1 { font-size: 2.5rem; }
+}
+
 /* ==========================================================================
    ENHANCED RESPONSIVENESS & MOBILE MENU
    =================================== */
@@ -1898,20 +1941,6 @@ input:focus, select:focus, textarea:focus {
         font-size: 1.25rem;
     }
 
-    /* Process Steps Stacking */
-    .process-container {
-        flex-direction: column;
-        gap: 3rem;
-    }
-
-    .step-connector {
-        display: none;
-    }
-
-    .process-step {
-        width: 100%;
-    }
-
     /* Dashboard & Grid Adjustments */
     .reports-grid {
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -1956,29 +1985,6 @@ input:focus, select:focus, textarea:focus {
 }
 
 @media (max-width: 576px) {
-    .landing-hero h1 {
-        font-size: 2.75rem;
-    }
-
-    .landing-hero p {
-        font-size: 1.1rem;
-        margin-bottom: 2.5rem;
-    }
-
-    .hero-stat-item h3 {
-        font-size: 2.5rem;
-    }
-
-    .hero-btns {
-        flex-direction: column;
-        width: 100%;
-    }
-
-    .hero-btns a {
-        width: 100%;
-        justify-content: center;
-    }
-    
     .form-container {
         padding: 1.5rem;
         margin-top: 0;
@@ -2469,36 +2475,100 @@ input[type="password"]:focus {
     text-decoration: underline;
 }
 
-.login-footer {
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.login-footer p {
-    text-align: center;
-    margin: 0;
-    color: var(--text-muted);
+.register-note {
+    margin: -0.5rem 0 1.1rem;
+    color: var(--text-secondary);
     font-size: 0.95rem;
+    line-height: 1.5;
 }
 
-.login-footer a {
-    color: var(--primary);
-    text-decoration: none;
-    font-weight: 600;
-    transition: color 0.3s ease;
+.password-rules-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: grid;
+    place-items: center;
+    padding: 1.25rem;
+    background: rgba(15, 23, 42, 0.58);
+    backdrop-filter: blur(8px);
 }
 
-.login-footer a:hover {
-    color: var(--primary-hover);
-    text-decoration: underline;
+.password-rules-card {
+    width: min(100%, 480px);
+    border-radius: var(--radius-xl, 1.5rem);
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    box-shadow: var(--shadow-xl, 0 30px 60px rgba(15, 23, 42, 0.2));
+    padding: 1.25rem;
 }
 
-.forgot-password-text {
-    font-size: 0.92rem !important;
+.password-rules-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.password-rules-header h2 {
+    margin: 0;
+    font-size: 1.35rem;
+}
+
+.password-rules-close {
+    width: 2.25rem;
+    height: 2.25rem;
+    border: none;
+    border-radius: 999px;
+    background: rgba(148, 163, 184, 0.14);
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.password-rules-summary {
+    margin: 0 0 0.9rem;
+    color: var(--text-secondary);
+}
+
+.password-rules-list {
+    margin: 0 0 1.1rem;
+    padding-left: 1.25rem;
+    color: var(--text-primary);
+}
+
+.password-rules-list li + li {
+    margin-top: 0.5rem;
+}
+
+.password-rules-code {
+    display: inline-block;
+    padding: 0 0.35rem;
+    border-radius: 0.4rem;
+    background: rgba(99, 102, 241, 0.12);
+    font-weight: 700;
+}
+
+.password-rules-ok {
+    margin-top: 0.25rem;
+}
+
+/* --------------------------------------------------------------------------
+   Placement-ready UI polish
+   -------------------------------------------------------------------------- */
+
+.nav-auth-link {
+    white-space: nowrap;
+}
+
+.btn-small {
+    padding: 0.65rem 1rem;
+    font-size: 0.9rem;
+    border-radius: var(--radius-full);
+}
+
+.btn-block {
+    width: 100%;
+    justify-content: center;
 }
 
 @media (max-width: 576px) {

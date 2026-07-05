@@ -1,292 +1,3 @@
-<<<<<<< HEAD
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login & Register - RoadFix</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-    <script src="js/theme.js" defer></script>
-    <style>
-        .auth-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: calc(100vh - 5rem);
-            padding: 2rem;
-        }
-
-        .auth-card {
-            width: 100%;
-            max-width: 480px;
-            background: var(--bg-card);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: var(--radius-lg);
-            padding: 3rem;
-            box-shadow: var(--shadow-xl);
-            border: 1px solid var(--border);
-            animation: fadeIn 0.6s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .auth-header {
-            text-align: center;
-            margin-bottom: 2.5rem;
-        }
-
-        .auth-header h1 {
-            font-size: 2.25rem;
-            font-weight: 800;
-            margin-bottom: 0.75rem;
-            letter-spacing: -1px;
-        }
-
-        .auth-header p {
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        .tabs {
-            display: flex;
-            background: var(--input-bg);
-            border-radius: var(--radius-full);
-            padding: 0.4rem;
-            margin-bottom: 2.5rem;
-            border: 1px solid var(--border);
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 0.85rem;
-            border: none;
-            background: none;
-            font-family: inherit;
-            font-weight: 700;
-            font-size: 0.95rem;
-            color: var(--text-muted);
-            cursor: pointer;
-            border-radius: var(--radius-full);
-            transition: var(--transition);
-        }
-
-        .tab-btn.active {
-            background: var(--bg-solid);
-            color: var(--primary);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .form-content {
-            display: none;
-        }
-
-        .form-content.active {
-            display: block;
-            animation: slideIn 0.4s ease-out;
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(10px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        .social-login {
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid var(--border);
-            text-align: center;
-        }
-
-        .social-login p {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            margin-bottom: 1.5rem;
-        }
-
-        .social-btns {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-        }
-
-        .social-btn {
-            width: 50px;
-            height: 50px;
-            border-radius: var(--radius-full);
-            border: 1px solid var(--border);
-            background: var(--bg-solid);
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .social-btn:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-            transform: translateY(-3px);
-            background: var(--info-bg);
-        }
-
-        .floating-label-group {
-            position: relative;
-            margin-bottom: 1.5rem;
-        }
-
-        .floating-label-group i {
-            position: absolute;
-            left: 1.25rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            transition: var(--transition);
-            pointer-events: none;
-        }
-
-        .floating-label-group input {
-            padding-left: 3.25rem;
-        }
-
-        .floating-label-group input:focus + i {
-            color: var(--primary);
-        }
-
-        .auth-footer {
-            margin-top: 2rem;
-            text-align: center;
-            font-size: 0.95rem;
-            color: var(--text-secondary);
-        }
-
-        .auth-footer a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 700;
-        }
-
-        .auth-footer a:hover {
-            text-decoration: underline;
-        }
-    </style>
-</head>
-<body>
-    <nav class="navbar">
-        <div class="container nav-container">
-            <a href="index.html" class="logo"><i class="fas fa-road"></i> RoadFix</a>
-            <div class="nav-right">
-                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Theme">
-                    <i class="fas fa-moon" id="theme-icon"></i>
-                </button>
-            </div>
-        </div>
-    </nav>
-
-    <main class="auth-wrapper">
-        <div class="auth-card">
-            <div class="auth-header">
-                <h1 id="auth-title">Welcome Back</h1>
-                <p id="auth-subtitle">Sign in to continue to RoadFix</p>
-            </div>
-
-            <div class="tabs">
-                <button class="tab-btn active" onclick="switchTab('login')">Login</button>
-                <button class="tab-btn" onclick="switchTab('register')">Register</button>
-            </div>
-
-            <!-- Login Form -->
-            <div id="login-form-container" class="form-content active">
-                <form id="loginForm">
-                    <div class="floating-label-group">
-                        <i class="fas fa-envelope"></i>
-                        <input type="text" id="loginEmail" placeholder="Email Address" required>
-                    </div>
-                    <div class="floating-label-group">
-                        <i class="fas fa-lock"></i>
-                        <input type="password" id="loginPassword" placeholder="Password" style="width: 100%; padding: 1rem 1.25rem 1rem 3.25rem; border: 1.5px solid var(--border); border-radius: var(--radius-md); font-family: inherit; font-size: 1rem; background-color: var(--input-bg); color: var(--text-primary); transition: var(--transition);" required>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary">
-                        Sign In <i class="fas fa-sign-in-alt"></i>
-                    </button>
-                </form>
-            </div>
-
-            <!-- Register Form -->
-            <div id="register-form-container" class="form-content">
-                <form id="registerForm">
-                    <div class="floating-label-group">
-                        <i class="fas fa-user"></i>
-                        <input type="text" id="regName" placeholder="Full Name" required>
-                    </div>
-                    <div class="floating-label-group">
-                        <i class="fas fa-envelope"></i>
-                        <input type="text" id="regEmail" placeholder="Email Address" required>
-                    </div>
-                    <div class="floating-label-group">
-                        <i class="fas fa-lock"></i>
-                        <input type="password" id="regPassword" placeholder="Create Password" style="width: 100%; padding: 1rem 1.25rem 1rem 3.25rem; border: 1.5px solid var(--border); border-radius: var(--radius-md); font-family: inherit; font-size: 1rem; background-color: var(--input-bg); color: var(--text-primary); transition: var(--transition);" required>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary">
-                        Create Account <i class="fas fa-user-plus"></i>
-                    </button>
-                </form>
-            </div>
-
-            <div id="authMessage" class="message hidden"></div>
-
-            <div class="social-login">
-                <p>Or continue with</p>
-                <div class="social-btns">
-                    <button class="social-btn"><i class="fab fa-google"></i></button>
-                    <button class="social-btn"><i class="fab fa-apple"></i></button>
-                    <button class="social-btn"><i class="fab fa-github"></i></button>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <script src="js/auth.js"></script>
-    <script>
-        function switchTab(type) {
-            const loginForm = document.getElementById('login-form-container');
-            const registerForm = document.getElementById('register-form-container');
-            const title = document.getElementById('auth-title');
-            const subtitle = document.getElementById('auth-subtitle');
-            const buttons = document.querySelectorAll('.tab-btn');
-
-            buttons.forEach(btn => btn.classList.remove('active'));
-            
-            if (type === 'login') {
-                loginForm.classList.add('active');
-                registerForm.classList.remove('active');
-                title.innerText = 'Welcome Back';
-                subtitle.innerText = 'Sign in to continue to RoadFix';
-                buttons[0].classList.add('active');
-            } else {
-                loginForm.classList.remove('active');
-                registerForm.classList.add('active');
-                title.innerText = 'Join RoadFix';
-                subtitle.innerText = 'Start making your community better';
-                buttons[1].classList.add('active');
-            }
-            
-            // Clear message when switching
-            const msg = document.getElementById('authMessage');
-            msg.classList.add('hidden');
-        }
-    </script>
-</body>
-=======
 <!doctype html>
 <html lang="en">
   <head>
@@ -297,7 +8,6 @@
       name="description"
       content="Sign in to RoadFix to report road issues, manage inspections, or access the admin dashboard."
     />
-    <!-- Outfit Font -->
     <link
       href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
       rel="stylesheet"
@@ -306,16 +16,21 @@
     <link rel="stylesheet" href="css/style.css" />
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     />
   </head>
   <body>
     <nav class="navbar">
       <div class="container nav-container">
-        <a href="login.html" class="logo"
+        <a href="index.html" class="logo"
           ><i class="fas fa-road"></i> RoadFix</a
         >
         <div class="nav-right">
+          <a
+            href="register.html"
+            class="btn btn-primary btn-small nav-auth-link"
+            >Create Account</a
+          >
           <button
             class="theme-toggle"
             onclick="toggleTheme()"
@@ -327,93 +42,129 @@
       </div>
     </nav>
 
-    <main class="login-page">
-      <div class="login-wrapper">
-        <!-- Login Card -->
-        <div class="login-card">
-          <div class="login-header">
-            <div class="login-icon-circle">
-              <i class="fas fa-shield-alt"></i>
-            </div>
-            <h1>Welcome to RoadFix</h1>
-            <p>Sign in to your account to report and manage road issues</p>
+    <main class="auth-shell">
+      <section class="auth-panel auth-hero-panel">
+        <p class="eyebrow">RoadFix Platform Access</p>
+        <h1>Sign in to report, review, and resolve faster.</h1>
+        <p class="auth-lead">
+          RoadFix keeps citizens, inspectors, and admins on the same workflow
+          with live status updates and a clear audit trail.
+        </p>
+        <div class="auth-points">
+          <div class="auth-point">
+            <i class="fas fa-location-dot"></i> Precise issue reporting
+          </div>
+          <div class="auth-point">
+            <i class="fas fa-chart-line"></i> Live dashboard tracking
+          </div>
+          <div class="auth-point">
+            <i class="fas fa-shield-halved"></i> Role-based access
+          </div>
+        </div>
+      </section>
+
+      <section class="auth-panel auth-form-panel">
+        <div class="login-header">
+          <div class="login-icon-circle">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <h2>Welcome back</h2>
+          <p>Use your account to access RoadFix.</p>
+        </div>
+
+        <form id="loginForm" autocomplete="off">
+          <div class="form-group">
+            <label for="loginEmail"
+              ><i class="fas fa-envelope"></i> Email Address</label
+            >
+            <input
+              type="email"
+              id="loginEmail"
+              name="email"
+              required
+              placeholder="you@example.com"
+              autocomplete="email"
+            />
           </div>
 
-          <form id="loginForm" autocomplete="off">
-            <div class="form-group">
-              <label for="loginEmail"
-                ><i class="fas fa-envelope"></i> Email Address</label
-              >
+          <div class="form-group">
+            <label for="loginPassword"
+              ><i class="fas fa-lock"></i> Password</label
+            >
+            <div class="password-wrapper">
               <input
-                type="email"
-                id="loginEmail"
-                name="email"
+                type="password"
+                id="loginPassword"
+                name="password"
                 required
-                placeholder="you@roadfix.com"
-                autocomplete="email"
+                placeholder="Enter your password"
+                autocomplete="current-password"
               />
-            </div>
-
-            <div class="form-group">
-              <label for="loginPassword"
-                ><i class="fas fa-lock"></i> Password</label
+              <button
+                type="button"
+                class="password-toggle-btn"
+                id="passwordToggleBtn"
+                aria-label="Toggle password visibility"
               >
-              <div class="password-wrapper">
-                <input
-                  type="password"
-                  id="loginPassword"
-                  name="password"
-                  required
-                  placeholder="Enter your password"
-                  autocomplete="current-password"
-                />
-                <button
-                  type="button"
-                  class="password-toggle-btn"
-                  id="passwordToggleBtn"
-                  aria-label="Toggle password visibility"
-                >
-                  <i class="fas fa-eye" id="passwordToggleIcon"></i>
-                </button>
-              </div>
+                <i class="fas fa-eye" id="passwordToggleIcon"></i>
+              </button>
             </div>
+          </div>
 
-            <div id="loginError" class="login-error hidden"></div>
+          <div id="loginError" class="login-error hidden"></div>
 
-            <button type="submit" class="btn btn-primary" id="loginSubmitBtn">
-              <i class="fas fa-sign-in-alt"></i> Sign In
-            </button>
+          <button
+            type="submit"
+            class="btn btn-primary btn-block"
+            id="loginSubmitBtn"
+          >
+            <i class="fas fa-sign-in-alt"></i> Sign In
+          </button>
 
-            <div class="login-footer">
-              <p class="register-redirect-text">
-                New here?
-                <a href="register.html">Create an account</a>
-              </p>
-              <p class="forgot-password-text">
-                <a href="#">Forgot your password?</a>
-              </p>
-            </div>
-          </form>
-        </div>
-      </div>
+          <div class="login-footer">
+            <p class="register-redirect-text">
+              New here? <a href="register.html">Create an account</a>
+            </p>
+          </div>
+        </form>
+      </section>
     </main>
 
     <div id="toast-container" class="toast-container"></div>
 
     <script>
-      // ---- Password toggle ----
       const passwordToggleBtn = document.getElementById("passwordToggleBtn");
       const passwordInput = document.getElementById("loginPassword");
       const passwordToggleIcon = document.getElementById("passwordToggleIcon");
+      const emailRule = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-      passwordToggleBtn.addEventListener("click", () => {
-        const isPassword = passwordInput.type === "password";
-        passwordInput.type = isPassword ? "text" : "password";
-        passwordToggleIcon.classList.toggle("fa-eye", !isPassword);
-        passwordToggleIcon.classList.toggle("fa-eye-slash", isPassword);
-      });
+      const getPasswordValidationMessage = (value) => {
+        const missingRules = [];
 
-      // ---- Form submission ----
+        if (value.length < 8)
+          missingRules.push("be at least 8 characters long");
+        if (!/[A-Z]/.test(value))
+          missingRules.push("include at least one uppercase letter");
+        if (!/[a-z]/.test(value))
+          missingRules.push("include at least one lowercase letter");
+        if (!/\d/.test(value)) missingRules.push("include at least one number");
+        if (!/[^A-Za-z\d]/.test(value))
+          missingRules.push("include at least one special character");
+
+        if (!missingRules.length) return "";
+
+        return `Password must ${missingRules.join(", ").replace(/, ([^,]*)$/, ", and $1")}.`;
+      };
+
+      if (passwordToggleBtn) {
+        passwordToggleBtn.addEventListener("click", () => {
+          const isPassword = passwordInput.type === "password";
+          passwordInput.type = isPassword ? "text" : "password";
+          passwordToggleIcon.classList.toggle("fa-eye", !isPassword);
+          passwordToggleIcon.classList.toggle("fa-eye-slash", isPassword);
+        });
+      }
+
       document
         .getElementById("loginForm")
         .addEventListener("submit", async (e) => {
@@ -424,7 +175,6 @@
           const errorBox = document.getElementById("loginError");
           const submitBtn = document.getElementById("loginSubmitBtn");
 
-          // Reset error
           errorBox.classList.add("hidden");
           errorBox.textContent = "";
 
@@ -434,7 +184,19 @@
             return;
           }
 
-          // Disable button
+          if (!emailRule.test(email)) {
+            errorBox.textContent = "Please enter a valid email address.";
+            errorBox.classList.remove("hidden");
+            return;
+          }
+
+          const passwordGuidance = getPasswordValidationMessage(password);
+          if (passwordGuidance) {
+            errorBox.textContent = passwordGuidance;
+            errorBox.classList.remove("hidden");
+            return;
+          }
+
           submitBtn.disabled = true;
           submitBtn.innerHTML =
             '<i class="fas fa-spinner fa-spin"></i> Signing in...';
@@ -460,21 +222,22 @@
                 throw new Error("Unexpected login response shape");
               }
 
-              // Store user info in localStorage
               localStorage.setItem("userRole", user.role);
               localStorage.setItem("userName", user.name);
               localStorage.setItem("userId", user.id);
 
-              // Redirect to main page
+              if (window.showToast)
+                window.showToast("Signed in successfully.", "success");
               window.location.href = "index.html";
             } else {
               errorBox.textContent =
                 (result && result.error) ||
-                "Invalid credentials. Please try again.";
+                "Invalid credentials. Please check your email and password.";
               errorBox.classList.remove("hidden");
             }
           } catch (err) {
             errorBox.textContent =
+              err.message ||
               "Network error. Please ensure the server is running.";
             errorBox.classList.remove("hidden");
           } finally {
@@ -483,11 +246,9 @@
           }
         });
 
-      // ---- If already logged in, redirect ----
       if (localStorage.getItem("userRole")) {
         window.location.href = "index.html";
       }
     </script>
   </body>
->>>>>>> 492c98a3349cef3abaea08ac9a2055d8f7e42518
 </html>

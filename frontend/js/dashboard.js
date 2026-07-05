@@ -1,6 +1,20 @@
 const API_URL = '/api/reports';
 let currentServerReports = [];
 
+function getReportDate(report) {
+    return report.createdAt || report.created_at || report.created || new Date().toISOString();
+}
+
+function normalizeReport(report) {
+    if (!report) return report;
+
+    return {
+        ...report,
+        id: report.id ?? report._id,
+        createdAt: getReportDate(report)
+    };
+}
+
 // ---- RBAC: Read role from localStorage ----
 function getUserRole() {
     return (localStorage.getItem('userRole') || '').toLowerCase();
@@ -66,7 +80,6 @@ document.addEventListener('DOMContentLoaded', () => {
 function clearDashboardFilters() {
     const categorySelect = document.getElementById('filterCategory');
     const statusSelect = document.getElementById('filterStatus');
-    const searchInput = document.getElementById('searchReports');
     const sortSelect = document.getElementById('sortReports');
 
     if (categorySelect) categorySelect.value = '';
@@ -138,6 +151,14 @@ let socketInitialized = false;
 function initSocket() {
     if (socketInitialized) return;
     socketInitialized = true;
+
+    if (typeof io !== 'function') {
+        const dot = document.querySelector('.live-dot');
+        if (dot) dot.classList.add('offline');
+        const txt = document.getElementById('liveText');
+        if (txt) txt.textContent = 'Offline';
+        return;
+    }
 
     const socket = io();
     
@@ -254,7 +275,8 @@ async function fetchReports() {
         const data = await response.json();
         
         if (response.ok) {
-            currentServerReports = Array.isArray(data.data) ? data.data : [];
+            const records = Array.isArray(data.data) ? data.data : Array.isArray(data) ? data : [];
+            currentServerReports = records.map(normalizeReport);
             applyClientFiltersAndRender();
         } else {
             console.error('Error fetching data:', data.error);
@@ -309,7 +331,7 @@ function renderReports(reports) {
         const PLACEHOLDER = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect width='400' height='200' fill='%23e2e8f0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='14' fill='%2394a3b8'%3ENo Image Provided%3C/text%3E%3C/svg%3E`;
         const imageUrl = report.image_url || PLACEHOLDER;
 
-        const dateStr = new Date(report.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+        const dateStr = new Date(getReportDate(report)).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
 
         let badgeClass = 'badge-warning';
         if (displayStatus === 'Pending') badgeClass = 'badge-info';
@@ -518,7 +540,7 @@ async function fetchStats() {
         const response = await fetch(`${API_URL}/stats`);
         const data = await response.json();
         if (response.ok) {
-            renderStats(data.data || []);
+            renderStats(Array.isArray(data.data) ? data.data : Array.isArray(data) ? data : []);
         }
     } catch (error) {
         console.error('Stats error:', error);
@@ -534,7 +556,7 @@ function renderStats(statsArray) {
         return acc;
     }, {});
 
-    const total = statsArray.reduce((sum, curr) => sum + curr.count, 0);
+    const total = statsArray.reduce((sum, curr) => sum + Number(curr.count || 0), 0);
     const resolved = statsMap['Resolved'] || 0;
     const pending = (statsMap['Pending'] || 0) + (statsMap['In Progress'] || 0);
 
