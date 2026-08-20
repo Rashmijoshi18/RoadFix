@@ -23,7 +23,13 @@ module.exports = async (req, res) => {
 		await initBackend();
 		return app(req, res);
 	} catch (err) {
-		console.error('Vercel backend init failed:', err.message);
-		return res.status(500).json({ success: false, error: 'Backend initialization failed' });
+		// Log full stack so it appears in Vercel function logs
+		console.error('Vercel backend init failed:', err.stack || err.message);
+		return res.status(500).json({
+			success: false,
+			error: 'Backend initialization failed',
+			// Expose details when not in production for easier debugging
+			details: process.env.NODE_ENV !== 'production' ? err.message : undefined
+		});
 	}
 };
