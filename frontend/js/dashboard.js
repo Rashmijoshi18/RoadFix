@@ -1,613 +1,581 @@
-const API_URL = '/api/reports';
-let currentServerReports = [];
+/**
+ * RoadFix — Citizen Dashboard v2
+ * Uses JWT cookie auth via api.js — no more localStorage x-user-* headers.
+ */
 
-function getReportDate(report) {
-    return report.createdAt || report.created_at || report.created || new Date().toISOString();
-}
+'use strict';
 
-function normalizeReport(report) {
-    if (!report) return report;
+let currentUser = null;
+let allReports = [];
+let socket = null;
 
-    return {
-        ...report,
-        id: report.id ?? report._id,
-        createdAt: getReportDate(report)
-    };
-}
+// ─── Bootstrap ────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+    // Require citizen (or any role — dashboard will filter to their data)
+    currentUser = await Session.require();
+    if (!currentUser) return; // redirected to login
 
-// ---- RBAC: Read role from localStorage ----
-function getUserRole() {
-    return (localStorage.getItem('userRole') || '').toLowerCase();
-}
-
-function getUserName() {
-    return localStorage.getItem('userName') || 'User';
-}
-
-function getUserId() {
-    return localStorage.getItem('userId') || 'unknown';
-}
-
-function normalizeStatus(status) {
-    return status === 'In Progress' ? 'Pending' : status;
-}
-
-// ---- Auth guard: redirect to login if not logged in ----
-function requireAuth() {
-    const role = getUserRole();
-    if (!role) {
-        window.location.href = 'login.html';
-        return false;
-    }
-    return true;
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    if (!requireAuth()) return;
-
-    setupRoleUI();
-    fetchReports();
-    fetchStats();
+    setupNavbar();
+    setupSidebar();
+    await Promise.all([fetchReports(), fetchStats(), fetchRewards(), fetchNotifications()]);
     initSocket();
-
-    const categorySelect = document.getElementById('filterCategory');
-    const statusSelect = document.getElementById('filterStatus');
-    const sortSelect = document.getElementById('sortReports');
-    const clearBtn = document.getElementById('clearFilters');
-    const searchQueryInput = document.getElementById('searchQuery');
-
-    if (categorySelect) categorySelect.addEventListener('change', fetchReports);
-    if (statusSelect) statusSelect.addEventListener('change', fetchReports);
-    if (sortSelect) sortSelect.addEventListener('change', applyClientFiltersAndRender);
-    if (clearBtn) clearBtn.addEventListener('click', clearDashboardFilters);
-    if (searchQueryInput) searchQueryInput.addEventListener('input', applyClientFiltersAndRender);
-
-    const toggleGuideBtn = document.getElementById('toggleGuide');
-    if (toggleGuideBtn) {
-        toggleGuideBtn.addEventListener('click', () => {
-            const helpSection = document.getElementById('dashboardHelp');
-            if (helpSection) {
-                helpSection.classList.toggle('collapsed');
-                const icon = toggleGuideBtn.querySelector('i');
-                if (helpSection.classList.contains('collapsed')) {
-                    icon.className = 'fas fa-question-circle';
-                } else {
-                    icon.className = 'fas fa-times-circle';
-                }
-            }
-        });
-    }
+    setupFilters();
+    setupNotificationPanel();
 });
 
-function clearDashboardFilters() {
-    const categorySelect = document.getElementById('filterCategory');
-    const statusSelect = document.getElementById('filterStatus');
-    const sortSelect = document.getElementById('sortReports');
-    const searchQueryInput = document.getElementById('searchQuery');
+// ─── Navbar ───────────────────────────────────────────────────────────────────
+function setupNavbar() {
+    const info = document.getElementById('navUserInfo');
+    if (info) {
+        info.innerHTML = `
+            <span style="font-size:0.85rem; color: var(--text-muted); font-weight: 600;">${escapeHTML(currentUser.name)}</span>
+            <button class="btn-logout" id="navLogoutBtn" title="Sign out" aria-label="Sign out">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        `;
+        document.getElementById('navLogoutBtn')?.addEventListener('click', () => Auth.logout());
+    }
 
-    if (categorySelect) categorySelect.value = '';
-    if (statusSelect) statusSelect.value = '';
-    if (sortSelect) sortSelect.value = 'newest';
-    if (searchQueryInput) searchQueryInput.value = '';
+    const welcomeLine = document.getElementById('welcomeLine');
+    if (welcomeLine) {
+        welcomeLine.textContent = `Welcome back, ${currentUser.name} — here are your submitted reports.`;
+    }
+}
 
+// ─── Sidebar ──────────────────────────────────────────────────────────────────
+function setupSidebar() {
+    const avatarEl = document.getElementById('sidebarAvatar');
+    const nameEl   = document.getElementById('sidebarName');
+    const roleEl   = document.getElementById('sidebarRole');
+
+    if (avatarEl) avatarEl.textContent = (currentUser.name || 'U')[0].toUpperCase();
+    if (nameEl)   nameEl.textContent = currentUser.name;
+    if (roleEl) {
+        roleEl.textContent = formatRole(currentUser.role);
+    }
+
+    document.getElementById('logoutSidebarBtn')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        Auth.logout();
+    });
+}
+
+// ─── Filters ──────────────────────────────────────────────────────────────────
+function setupFilters() {
+    const statusSel   = document.getElementById('filterStatus');
+    const categorySel = document.getElementById('filterCategory');
+    const sortSel     = document.getElementById('sortReports');
+    const searchInput = document.getElementById('searchQuery');
+    const clearBtn    = document.getElementById('clearFilters');
+
+    statusSel?.addEventListener('change', () => { fetchReports(); });
+    categorySel?.addEventListener('change', fetchReports);
+    sortSel?.addEventListener('change', applyClientFiltersAndRender);
+    searchInput?.addEventListener('input', applyClientFiltersAndRender);
+    clearBtn?.addEventListener('click', clearFilters);
+}
+
+function clearFilters() {
+    document.getElementById('filterStatus').value = '';
+    document.getElementById('filterCategory').value = '';
+    document.getElementById('sortReports').value = 'newest';
+    document.getElementById('searchQuery').value = '';
     fetchReports();
 }
 
+// ─── Fetch Reports ────────────────────────────────────────────────────────────
+async function fetchReports() {
+    showSkeletonCards();
+
+    const category = document.getElementById('filterCategory')?.value || '';
+    const status   = document.getElementById('filterStatus')?.value || '';
+
+    const params = {};
+    if (category) params.category = category;
+    if (status && status !== 'sla-breached') params.status = status;
+
+    try {
+        const data = await api.get('/reports', params);
+        allReports = (data?.data || []).map(normalizeReport);
+        applyClientFiltersAndRender();
+    } catch (err) {
+        showError('Failed to load your reports. ' + (err.message || ''));
+    }
+}
+
+// ─── Fetch Stats ──────────────────────────────────────────────────────────────
+async function fetchStats() {
+    try {
+        const data = await api.get('/reports/stats');
+        renderStats(data?.data || {});
+    } catch {
+        // non-critical — fail silently
+    }
+}
+
+// ─── Fetch Rewards ────────────────────────────────────────────────────────────
+async function fetchRewards() {
+    if (currentUser.role !== 'citizen') return;
+    try {
+        const data = await api.get('/rewards/me');
+        renderRewards(data?.data);
+    } catch {
+        // non-critical
+    }
+}
+
+// ─── Fetch Notifications ─────────────────────────────────────────────────────
+async function fetchNotifications() {
+    try {
+        const data = await api.get('/notifications');
+        renderNotifications(data?.data || [], data?.unreadCount || 0);
+    } catch {
+        // non-critical
+    }
+}
+
+// ─── Client Filters + Render ──────────────────────────────────────────────────
 function applyClientFiltersAndRender() {
-    const sortSelect = document.getElementById('sortReports');
-    const statusSelect = document.getElementById('filterStatus');
-    const searchQueryInput = document.getElementById('searchQuery');
+    const sortBy  = document.getElementById('sortReports')?.value || 'newest';
+    const status  = document.getElementById('filterStatus')?.value || '';
+    const query   = (document.getElementById('searchQuery')?.value || '').toLowerCase().trim();
 
-    const sortBy = sortSelect ? sortSelect.value : 'newest';
-    const selectedStatus = statusSelect ? statusSelect.value : '';
-    const query = searchQueryInput ? searchQueryInput.value.toLowerCase().trim() : '';
+    let reports = [...allReports];
 
-    let reports = [...currentServerReports];
-
-    if (selectedStatus === 'sla-breached') {
+    if (status === 'sla-breached') {
         reports = reports.filter(r => window.getSLAStatus && window.getSLAStatus(r) === 'breached');
-    } else if (selectedStatus === 'Pending') {
-        reports = reports.filter(r => ['Pending', 'In Progress'].includes(r.status));
-    } else if (selectedStatus) {
-        reports = reports.filter(r => normalizeStatus(r.status) === selectedStatus);
+    } else if (status) {
+        reports = reports.filter(r => r.status === status);
     }
 
     if (query) {
-        reports = reports.filter(r => 
-            (r.title && r.title.toLowerCase().includes(query)) ||
-            (r.description && r.description.toLowerCase().includes(query)) ||
-            (r.address && r.address.toLowerCase().includes(query))
+        reports = reports.filter(r =>
+            (r.title || '').toLowerCase().includes(query) ||
+            (r.description || '').toLowerCase().includes(query) ||
+            (r.address || '').toLowerCase().includes(query)
         );
     }
 
-    updateResultsMeta(reports.length, currentServerReports.length);
-
     reports.sort((a, b) => {
-        if (sortBy === 'oldest') {
-            return new Date(a.createdAt) - new Date(b.createdAt);
-        }
-
+        if (sortBy === 'oldest') return new Date(a.createdAt) - new Date(b.createdAt);
         if (sortBy === 'upvotes') {
-            const aVotes = Array.isArray(a.upvotedBy) ? a.upvotedBy.length : 0;
-            const bVotes = Array.isArray(b.upvotedBy) ? b.upvotedBy.length : 0;
-            return bVotes - aVotes;
+            return (b.upvotedBy?.length || 0) - (a.upvotedBy?.length || 0);
         }
-
-        if (sortBy === 'sla') {
-            const weight = (report) => {
-                if (!window.getSLAStatus) return 0;
-                const sla = window.getSLAStatus(report);
-                if (sla === 'breached') return 3;
-                if (sla === 'due-soon') return 2;
-                return 1;
-            };
-
-            const diff = weight(b) - weight(a);
-            if (diff !== 0) return diff;
-            return new Date(b.createdAt) - new Date(a.createdAt);
+        if (sortBy === 'sla' && window.getSLAStatus) {
+            const w = r => ({ breached: 3, 'due-soon': 2 }[window.getSLAStatus(r)] || 1);
+            return w(b) - w(a) || new Date(b.createdAt) - new Date(a.createdAt);
         }
-
         return new Date(b.createdAt) - new Date(a.createdAt);
     });
+
+    const meta = document.getElementById('resultsMeta');
+    if (meta) {
+        meta.innerHTML = reports.length > 0
+            ? `<i class="fas fa-list"></i> Showing <strong>${reports.length}</strong> of ${allReports.length} reports`
+            : '';
+    }
 
     renderReports(reports);
 }
 
-function updateResultsMeta(visibleCount, baseCount) {
-    const meta = document.getElementById('resultsMeta');
-    if (!meta) return;
+// ─── Render Stats ─────────────────────────────────────────────────────────────
+function renderStats({ statusStats = [], categoryStats = [] }) {
+    const grid = document.getElementById('statsGrid');
+    if (!grid) return;
 
-    meta.innerHTML = `<i class="fas fa-list"></i> Showing <strong>${visibleCount}</strong> reports`;
-}
+    const statusMap = {};
+    statusStats.forEach(s => { statusMap[s.status] = s.count; });
 
-// Socket Setup
-let socketInitialized = false;
-function initSocket() {
-    if (socketInitialized) return;
-    socketInitialized = true;
+    const total    = statusStats.reduce((sum, s) => sum + (s.count || 0), 0);
+    const reported = statusMap['Reported'] || 0;
+    const inProg   = (statusMap['In Progress'] || 0) + (statusMap['Assigned'] || 0) + (statusMap['Verified'] || 0);
+    const resolved = (statusMap['Completed'] || 0) + (statusMap['Closed'] || 0);
 
-    if (typeof io !== 'function') {
-        const dot = document.querySelector('.live-dot');
-        if (dot) dot.classList.add('offline');
-        const txt = document.getElementById('liveText');
-        if (txt) txt.textContent = 'Offline';
-        return;
-    }
-
-    const socket = io();
-    
-    socket.on("connect", () => {
-        const dot = document.querySelector(".live-dot");
-        if (dot) dot.classList.remove("offline");
-        const txt = document.getElementById("liveText");
-        if (txt) txt.textContent = "Live";
-    });
-    
-    socket.on("disconnect", () => {
-        const dot = document.querySelector(".live-dot");
-        if (dot) dot.classList.add("offline");
-        const txt = document.getElementById("liveText");
-        if (txt) txt.textContent = "Offline";
-    });
-    
-    socket.on("report:new", (report) => {
-        fetchReports(); // Simpler logic for this demo config
-        if (window.showToast) window.showToast("📍 New report: " + report.title, "info");
-        fetchStats();
-    });
-    
-    socket.on("report:updated", (report) => {
-        fetchReports();
-        if (window.showToast) window.showToast("🔄 Report #" + report.id + " \u2192 " + report.status, "success");
-        fetchStats();
-    });
-    
-    socket.on("report:deleted", ({ id }) => {
-        fetchReports();
-        if (window.showToast) window.showToast("🗑️ A report was removed", "warning");
-        fetchStats();
-    });
-    
-    socket.on("report:upvoted", ({ id, upvotes }) => {
-        const countEl = document.getElementById('upvote-count-' + id);
-        if (countEl) countEl.textContent = upvotes;
-    });
-}
-
-/**
- * Setup UI elements based on user role
- */
-function setupRoleUI() {
-    const role = getUserRole();
-    const name = getUserName();
-
-    const welcomeLine = document.getElementById('welcomeLine');
-    if (welcomeLine) {
-        welcomeLine.textContent = `Welcome, ${name}. Here's a focused view of your community reports.`;
-    }
-
-    const roleActionTip = document.getElementById('roleActionTip');
-    if (roleActionTip) {
-        if (role === 'admin') {
-            roleActionTip.textContent = 'As Admin, you can update statuses, delete incorrect reports, and access the audit trail.';
-        } else if (role === 'inspector') {
-            roleActionTip.textContent = 'As Inspector, move issues through Reported, Pending, and Resolved with proper notes.';
-        } else {
-            roleActionTip.textContent = 'As Citizen, monitor progress, upvote important issues, and submit new reports when needed.';
-        }
-    }
-}
-
-// Basic HTML escaper
-function escapeHTML(str) {
-    if (!str) return str;
-    return str.replace(/[&<>'"]/g, 
-        tag => ({
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            "'": '&#39;',
-            '"': '&quot;'
-        }[tag])
-    );
-}
-
-// Fetch Reports
-async function fetchReports() {
-    const loader = document.getElementById('loader');
-    const grid = document.getElementById('reportsGrid');
-    if (!loader || !grid) return;
-    
-    loader.style.display = 'flex';
-    grid.innerHTML = '';
-
-    const category = document.getElementById('filterCategory').value;
-    const status = document.getElementById('filterStatus').value;
-    
-    let url = API_URL;
-    const params = new URLSearchParams();
-    if (category) params.append('category', category);
-    if (status && status !== 'sla-breached' && status !== 'Pending') params.append('status', status);
-    if (params.toString()) url += `?${params.toString()}`;
-
-    try {
-        const response = await fetch(url, {
-            headers: {
-                'x-user-role': getUserRole(),
-                'x-user-id': getUserId(),
-                'x-user-name': getUserName()
-            }
-        });
-        const data = await response.json();
-        
-        if (response.ok) {
-            const records = Array.isArray(data.data) ? data.data : Array.isArray(data) ? data : [];
-            currentServerReports = records.map(normalizeReport);
-            applyClientFiltersAndRender();
-        } else {
-            console.error('Error fetching data:', data.error);
-            grid.innerHTML = `<div class="message error"><i class="fas fa-exclamation-triangle"></i> Failed to load reports.</div>`;
-            updateResultsMeta(0, 0, '');
-        }
-    } catch (error) {
-        console.error('Fetch error:', error);
-        grid.innerHTML = `<div class="message error"><i class="fas fa-wifi"></i> Network error. Ensure backend is running.</div>`;
-        updateResultsMeta(0, 0, '');
-    } finally {
-        loader.style.display = 'none';
-    }
-}
-
-function renderReports(reports) {
-    const grid = document.getElementById('reportsGrid');
-    const role = getUserRole();
-
-    if (!reports || reports.length === 0) {
-        grid.innerHTML = `
-            <div style="grid-column: 1/-1; text-align: center; padding: 4rem; background: var(--bg-white); border-radius: var(--radius-lg); border: 1px dashed var(--border);">
-                <i class="fas fa-inbox" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
-                <h3 style="color: var(--text-dark);">No reports found</h3>
-                <p style="color: var(--text-muted); margin-bottom: 1rem;">Try adjusting your filters or checking back later.</p>
-                <div style="display:flex; gap:0.75rem; justify-content:center; flex-wrap:wrap;">
-                    <button id="emptyClearFilters" class="dashboard-clear-btn" type="button">
-                        <i class="fas fa-rotate-left"></i> Reset Filters
-                    </button>
-                    <a href="report.html" class="btn btn-primary" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.4rem;">
-                        <i class="fas fa-plus-circle"></i> Report New Issue
-                    </a>
-                </div>
-            </div>`;
-
-        const resetBtn = document.getElementById('emptyClearFilters');
-        if (resetBtn) {
-            resetBtn.addEventListener('click', clearDashboardFilters);
-        }
-
-        return;
-    }
-
-    const upvotedLocal = JSON.parse(localStorage.getItem("upvoted_reports") || "[]");
-
-    reports.forEach(report => {
-        const displayStatus = normalizeStatus(report.status);
-        const card = document.createElement('div');
-        card.className = 'report-card';
-        card.id = `report-card-${report.id}`;
-        
-        const PLACEHOLDER = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect width='400' height='200' fill='%23e2e8f0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='14' fill='%2394a3b8'%3ENo Image Provided%3C/text%3E%3C/svg%3E`;
-        const imageUrl = report.image_url || PLACEHOLDER;
-
-        const dateStr = new Date(getReportDate(report)).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
-
-        let badgeClass = 'badge-warning';
-        if (displayStatus === 'Pending') badgeClass = 'badge-info';
-        if (displayStatus === 'Resolved') badgeClass = 'badge-success';
-
-        let slaHTML = '';
-        if (window.getSLAStatus) {
-            const slaStatus = window.getSLAStatus(report);
-            const slaText = window.getSLADeadlineText(report);
-            if (slaStatus === 'breached') {
-                slaHTML = `<div style="margin-bottom: 1rem;"><span class="badge-sla-breached">⚠ SLA BREACHED</span><div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">${slaText}</div></div>`;
-            } else if (slaStatus === 'due-soon') {
-                slaHTML = `<div style="margin-bottom: 1rem;"><span class="badge-sla-due-soon">⏰ Due Soon</span><div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">${slaText}</div></div>`;
-            } else {
-                slaHTML = `<div style="margin-bottom: 1rem;"><div style="font-size: 0.75rem; color: var(--text-muted);">${slaText}</div></div>`;
-            }
-        }
-
-        let statusSelectHTML = '';
-        let deleteButtonHTML = '';
-
-        const dbUpvotedCount = Array.isArray(report.upvotedBy) ? report.upvotedBy.length : 0;
-        const isUpvoted = upvotedLocal.includes(report.id.toString());
-        const upvoteClass = isUpvoted ? 'voted' : '';
-
-        // Status update options: admin and inspector only
-        if (role === 'admin' || role === 'inspector') {
-            statusSelectHTML = `
-                <div class="status-select-wrapper">
-                    <select class="update-status" data-id="${report.id}">
-                        <option value="Reported" ${report.status === 'Reported' ? 'selected' : ''}>Reported</option>
-                        <option value="Pending" ${displayStatus === 'Pending' ? 'selected' : ''}>Pending</option>
-                        <option value="Resolved" ${displayStatus === 'Resolved' ? 'selected' : ''}>Resolved</option>
-                    </select>
-                </div>
-            `;
-        } else {
-            statusSelectHTML = `
-                <div class="status-read-only">
-                    <span class="badge ${badgeClass}">${displayStatus}</span>
-                </div>
-            `;
-        }
-
-        // Delete: admin, inspector, or any user if Resolved
-        if (role === 'admin' || role === 'inspector' || displayStatus === 'Resolved') {
-            deleteButtonHTML = `
-                <button class="btn-small btn-delete" data-id="${report.id}" title="Delete Report">
-                    <i class="fas fa-trash-alt"></i> Delete
-                </button>
-            `;
-        }
-
-        card.innerHTML = `
-            <div class="report-img-wrapper">
-                <img src="${imageUrl}" alt="Report" class="report-img" onerror="this.onerror=null;this.src='${PLACEHOLDER}'">
-                <div class="badge-position">
-                    <span class="badge ${badgeClass}">${displayStatus}</span>
-                </div>
-            </div>
-            <div class="report-content">
-                <div class="report-title">${escapeHTML(report.title)}</div>
-                
-                <div class="report-meta">
-                    <div class="report-meta-item"><i class="fas fa-map-marker-alt"></i> ${escapeHTML(report.address) || 'Location'}</div>
-                    <div class="report-meta-item"><i class="far fa-calendar-alt"></i> ${dateStr}</div>
-                    <div class="report-meta-item"><i class="fas fa-tag"></i> ${escapeHTML(report.category)}</div>
-                </div>
-                
-                ${slaHTML}
-
-                <div class="report-desc">
-                    ${escapeHTML(report.description) || '<i>No description</i>'}
-                </div>
-                
-                ${report.solution ? `
-                <div class="report-solution">
-                    <strong><i class="fas fa-check-circle"></i> Resolution:</strong> ${escapeHTML(report.solution)}
-                </div>` : ''}
-                
-                <div class="report-actions">
-                    <button class="btn-upvote ${upvoteClass}" data-id="${report.id}">
-                        <i class="fas fa-arrow-up"></i>
-                        <span id="upvote-count-${report.id}">${dbUpvotedCount}</span>
-                    </button>
-                    ${statusSelectHTML}
-                    ${deleteButtonHTML}
-                </div>
-            </div>
-        `;
-        grid.appendChild(card);
-    });
-
-    // Event listeners
-    document.querySelectorAll('.update-status').forEach(select => {
-        select.addEventListener('change', async (e) => {
-            const reportId = e.target.getAttribute('data-id');
-            const newStatus = e.target.value;
-            let solution = undefined;
-            if (newStatus === 'Resolved') {
-                solution = prompt('Please describe how this issue was resolved (or leave blank):');
-                if (solution === null) {
-                    fetchReports();
-                    return;
-                }
-            }
-            e.target.disabled = true;
-            await updateStatus(reportId, newStatus, solution);
-        });
-    });
-
-    document.querySelectorAll('.btn-delete').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-            const targetBtn = e.target.closest('button');
-            const reportId = targetBtn.getAttribute('data-id');
-            if (confirm('Permanently delete this report?')) {
-                const card = targetBtn.closest('.report-card');
-                card.style.opacity = '0.5';
-                await deleteReport(reportId);
-            }
-        });
-    });
-
-    // Upvote
-    document.querySelectorAll('.btn-upvote').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-            const targetBtn = e.target.closest('button');
-            const reportId = targetBtn.getAttribute('data-id');
-            await handleUpvote(reportId, targetBtn);
-        });
-    });
-}
-
-async function handleUpvote(id, btnElement) {
-    let upvotedLocal = JSON.parse(localStorage.getItem("upvoted_reports") || "[]");
-    
-    if (upvotedLocal.includes(id.toString())) {
-        if (window.showToast) window.showToast("Already upvoted!", "warning");
-        return;
-    }
-
-    try {
-        const response = await fetch(`${API_URL}/${id}/upvote`, {
-            method: 'PATCH',
-            headers: { 'x-user-id': getUserId() }
-        });
-        
-        if (!response.ok) {
-            if (window.showToast) window.showToast('Failed to upvote report.', 'error');
-            return;
-        }
-
-        const data = await response.json();
-        
-        upvotedLocal.push(id.toString());
-        localStorage.setItem("upvoted_reports", JSON.stringify(upvotedLocal));
-
-        btnElement.classList.add('voted');
-        if (window.showToast) window.showToast("✅ Upvoted!", "success");
-
-        const countSpan = document.getElementById(`upvote-count-${id}`);
-        if (countSpan) countSpan.textContent = data.upvotes;
-        
-    } catch (err) {
-        if (window.showToast) window.showToast('Network error while upvoting.', 'error');
-    }
-}
-
-async function deleteReport(id) {
-    try {
-        const response = await fetch(`${API_URL}/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'x-user-role': getUserRole(),
-                'x-user-id': getUserId(),
-                'x-user-name': getUserName()
-            }
-        });
-        if (!response.ok) {
-            const data = await response.json();
-            if (window.showToast) window.showToast(data.error || 'Failed to delete report.', 'error');
-        }
-    } catch (err) {
-        if (window.showToast) window.showToast('Network error while deleting.', 'error');
-    }
-}
-
-async function updateStatus(id, newStatus, solution) {
-    try {
-        const payload = { status: newStatus };
-        if (solution !== undefined) payload.solution = solution;
-
-        const response = await fetch(`${API_URL}/${id}/status`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-user-role': getUserRole(),
-                'x-user-id': getUserId(),
-                'x-user-name': getUserName()
-            },
-            body: JSON.stringify(payload)
-        });
-        if (!response.ok) {
-            const data = await response.json();
-            if (window.showToast) window.showToast(data.error || 'Failed to update.', 'error');
-        }
-    } catch (err) {
-        if (window.showToast) window.showToast('Network error while updating.', 'error');
-    }
-}
-
-async function fetchStats() {
-    try {
-        const response = await fetch(`${API_URL}/stats`);
-        const data = await response.json();
-        if (response.ok) {
-            renderStats(Array.isArray(data.data) ? data.data : Array.isArray(data) ? data : []);
-        }
-    } catch (error) {
-        console.error('Stats error:', error);
-    }
-}
-
-function renderStats(statsArray) {
-    const container = document.getElementById('statsContainer');
-    if (!container) return;
-
-    const statsMap = statsArray.reduce((acc, curr) => {
-        acc[curr.status] = curr.count;
-        return acc;
-    }, {});
-
-    const total = statsArray.reduce((sum, curr) => sum + Number(curr.count || 0), 0);
-    const resolved = statsMap['Resolved'] || 0;
-    const pending = (statsMap['Pending'] || 0) + (statsMap['In Progress'] || 0);
-
-    const currentStatus = document.getElementById('filterStatus') ? document.getElementById('filterStatus').value : '';
-
-    container.innerHTML = `
-        <div class="stat-card ${!currentStatus ? 'active' : ''}" data-filter="">
-            <div class="stat-icon total"><i class="fas fa-list"></i></div>
-            <div class="stat-details">
-                <h3>${total}</h3>
-                <p>Total Reports</p>
-            </div>
+    grid.innerHTML = `
+        <div class="stat-card-v2 total" data-filter="" title="View all reports">
+            <div class="stat-icon-v2 total"><i class="fas fa-layer-group"></i></div>
+            <div class="stat-number">${total}</div>
+            <div class="stat-label">Total Reports</div>
         </div>
-        <div class="stat-card ${currentStatus === 'Resolved' ? 'active' : ''}" data-filter="Resolved">
-            <div class="stat-icon resolved"><i class="fas fa-check-circle"></i></div>
-            <div class="stat-details">
-                <h3 style="color: var(--success);">${resolved}</h3>
-                <p>Issues Resolved</p>
-            </div>
+        <div class="stat-card-v2 reported" data-filter="Reported" title="Filter: Reported">
+            <div class="stat-icon-v2 reported"><i class="fas fa-flag"></i></div>
+            <div class="stat-number">${reported}</div>
+            <div class="stat-label">Reported</div>
         </div>
-        <div class="stat-card ${currentStatus === 'Pending' ? 'active' : ''}" data-filter="Pending">
-            <div class="stat-icon progress"><i class="fas fa-clock"></i></div>
-            <div class="stat-details">
-                <h3 style="color: var(--primary);">${pending}</h3>
-                <p>Pending Issues</p>
-            </div>
+        <div class="stat-card-v2 progress" data-filter="In Progress" title="Filter: In Progress">
+            <div class="stat-icon-v2 progress"><i class="fas fa-spinner"></i></div>
+            <div class="stat-number">${inProg}</div>
+            <div class="stat-label">In Progress</div>
+        </div>
+        <div class="stat-card-v2 resolved" data-filter="Completed" title="Filter: Completed">
+            <div class="stat-icon-v2 resolved"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-number">${resolved}</div>
+            <div class="stat-label">Resolved</div>
         </div>
     `;
 
-    // Add click listeners for interactive filtering
-    container.querySelectorAll('.stat-card').forEach(card => {
+    grid.querySelectorAll('.stat-card-v2').forEach(card => {
         card.addEventListener('click', () => {
-            const statusSelect = document.getElementById('filterStatus');
-            if (statusSelect) {
-                statusSelect.value = card.getAttribute('data-filter');
-                statusSelect.dispatchEvent(new Event('change'));
+            const statusSel = document.getElementById('filterStatus');
+            if (statusSel) {
+                statusSel.value = card.dataset.filter;
+                fetchReports();
             }
         });
     });
+}
+
+// ─── Render Rewards ───────────────────────────────────────────────────────────
+function renderRewards(data) {
+    if (!data) return;
+    const widget = document.getElementById('rewardsWidget');
+    if (!widget) return;
+
+    const levelIcons = { Bronze: '🥉', Silver: '🥈', Gold: '🥇', Platinum: '💎' };
+    document.getElementById('rewardsIcon').textContent   = levelIcons[data.level?.name] || '🥉';
+    document.getElementById('rewardsLevel').textContent  = data.level?.name || 'Bronze';
+    document.getElementById('rewardsPoints').textContent = `${data.points || 0} pts`;
+    document.getElementById('rewardsProgressFill').style.width = `${data.progress || 0}%`;
+
+    if (data.nextLevel) {
+        document.getElementById('rewardsNextLabel').textContent = `Next: ${data.nextLevel.name} at ${data.nextLevel.min} pts`;
+    } else {
+        document.getElementById('rewardsNextLabel').textContent = 'Max level reached! 🏆';
+    }
+
+    widget.style.display = 'flex';
+}
+
+// ─── Render Reports ───────────────────────────────────────────────────────────
+function renderReports(reports) {
+    const grid = document.getElementById('reportsGrid');
+    if (!grid) return;
+
+    if (!reports || reports.length === 0) {
+        grid.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon"><i class="fas fa-inbox"></i></div>
+                <div class="empty-title">No reports found</div>
+                <div class="empty-sub">Try adjusting your filters or submit a new complaint.</div>
+                <div class="empty-actions">
+                    <button class="btn btn-outline" onclick="clearFilters()">
+                        <i class="fas fa-rotate-left"></i> Reset Filters
+                    </button>
+                    <a href="report.html" class="btn btn-primary">
+                        <i class="fas fa-plus-circle"></i> New Report
+                    </a>
+                </div>
+            </div>`;
+        return;
+    }
+
+    const upvotedLocal = new Set(JSON.parse(localStorage.getItem('upvoted_reports') || '[]'));
+
+    grid.innerHTML = '';
+    reports.forEach(report => {
+        const card = createReportCard(report, upvotedLocal);
+        grid.appendChild(card);
+    });
+
+    // Attach event listeners
+    grid.querySelectorAll('.btn-upvote-v2').forEach(btn => {
+        btn.addEventListener('click', () => handleUpvote(btn.dataset.id, btn));
+    });
+    grid.querySelectorAll('.timeline-toggle').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const timeline = btn.nextElementSibling;
+            timeline?.classList.toggle('open');
+            const icon = btn.querySelector('i');
+            icon.className = timeline?.classList.contains('open')
+                ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
+        });
+    });
+}
+
+function createReportCard(report, upvotedLocal) {
+    const card = document.createElement('div');
+    card.className = 'report-card-v2';
+    card.id = `report-card-${report.id}`;
+
+    const statusClass = {
+        'Reported': 'tag-reported', 'Verified': 'tag-verified', 'Assigned': 'tag-assigned',
+        'In Progress': 'tag-inprogress', 'Completed': 'tag-completed', 'Closed': 'tag-closed'
+    }[report.status] || 'tag-reported';
+
+    const priorityClass = {
+        'Low': 'priority-low', 'Medium': 'priority-medium',
+        'High': 'priority-high', 'Critical': 'priority-critical'
+    }[report.priority] || 'priority-medium';
+
+    const dateStr = new Date(report.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+    const upvotes = Array.isArray(report.upvotedBy) ? report.upvotedBy.length : 0;
+    const isUpvoted = upvotedLocal.has(report.id?.toString());
+
+    // SLA
+    let slaHTML = '';
+    if (window.getSLAStatus && !['Completed', 'Closed'].includes(report.status)) {
+        const sla = window.getSLAStatus(report);
+        const slaText = window.getSLADeadlineText(report);
+        const slaClass = sla === 'breached' ? 'sla-breached' : sla === 'due-soon' ? 'sla-due-soon' : 'sla-ok';
+        const slaIcon = sla === 'breached' ? '⚠' : sla === 'due-soon' ? '⏰' : '✓';
+        slaHTML = `<span class="sla-badge ${slaClass}">${slaIcon} ${slaText}</span>`;
+    }
+
+    // Timeline
+    let timelineHTML = '';
+    if (Array.isArray(report.statusTimeline) && report.statusTimeline.length > 0) {
+        timelineHTML = `
+            <button class="timeline-toggle">
+                <i class="fas fa-chevron-down"></i> View Timeline (${report.statusTimeline.length} steps)
+            </button>
+            <div class="timeline">
+                ${report.statusTimeline.map(step => `
+                    <div class="timeline-step">
+                        <div class="timeline-dot done"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-status">${escapeHTML(step.status)}</div>
+                            <div class="timeline-meta">by ${escapeHTML(step.changedBy)} · ${new Date(step.changedAt).toLocaleDateString()}</div>
+                            ${step.note ? `<div class="timeline-note">${escapeHTML(step.note)}</div>` : ''}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>`;
+    }
+
+    // Image
+    const imgHTML = report.image_url
+        ? `<img src="${escapeHTML(report.image_url)}" alt="Report photo" class="report-card-img" loading="lazy" onerror="this.parentElement.innerHTML='<div class=report-card-img-placeholder><i class=fas fa-image></i></div>'">`
+        : `<div class="report-card-img-placeholder"><i class="fas fa-image"></i></div>`;
+
+    card.innerHTML = `
+        ${imgHTML}
+        <div class="report-card-body">
+            <div class="report-card-tags">
+                <span class="tag ${statusClass}">${escapeHTML(report.status)}</span>
+                <span class="tag tag-category"><i class="fas fa-tag"></i> ${escapeHTML(report.category)}</span>
+                ${slaHTML}
+            </div>
+            <div class="report-card-title">
+                <span class="priority-dot ${priorityClass}"></span>${escapeHTML(report.title)}
+            </div>
+            <div class="report-card-meta">
+                <span><i class="fas fa-map-marker-alt"></i>${escapeHTML(report.address || 'Location not set')}</span>
+                <span><i class="far fa-calendar"></i>${dateStr}</span>
+            </div>
+            <div class="report-card-desc">${escapeHTML(report.description) || '<em>No description provided.</em>'}</div>
+            ${report.solution ? `
+                <div style="background: rgba(16,185,129,0.08); border-left: 3px solid #10b981; padding: 0.6rem 0.8rem; border-radius: 6px; margin-bottom: 0.75rem; font-size: 0.82rem; color: #059669;">
+                    <strong><i class="fas fa-check"></i> Resolution:</strong> ${escapeHTML(report.solution)}
+                </div>` : ''}
+            ${timelineHTML}
+        </div>
+        <div class="report-card-footer">
+            <button class="btn-upvote-v2 ${isUpvoted ? 'voted' : ''}" data-id="${report.id}" title="Upvote this report">
+                <i class="fas fa-arrow-up"></i>
+                <span id="upvote-count-${report.id}">${upvotes}</span>
+            </button>
+            <span style="margin-left: auto; font-size: 0.75rem; color: var(--text-muted);">
+                <i class="fas fa-hashtag" style="font-size: 0.65rem;"></i>${escapeHTML(report.id?.slice(-8) || '')}
+            </span>
+        </div>
+    `;
+
+    return card;
+}
+
+// ─── Notifications Panel ──────────────────────────────────────────────────────
+function setupNotificationPanel() {
+    const btn   = document.getElementById('notifBtn');
+    const panel = document.getElementById('notifPanel');
+    const markAllBtn = document.getElementById('markAllRead');
+
+    btn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        panel?.classList.toggle('open');
+    });
+
+    markAllBtn?.addEventListener('click', async () => {
+        try {
+            await api.patch('/notifications/read-all', {});
+            document.querySelectorAll('.notif-item').forEach(el => el.classList.remove('unread'));
+            const badge = document.getElementById('notifBadge');
+            if (badge) badge.style.display = 'none';
+        } catch { }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!document.getElementById('notifWrap')?.contains(e.target)) {
+            panel?.classList.remove('open');
+        }
+    });
+}
+
+function renderNotifications(notifs, unreadCount) {
+    const list  = document.getElementById('notifList');
+    const badge = document.getElementById('notifBadge');
+
+    if (badge) {
+        if (unreadCount > 0) {
+            badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+            badge.style.display = 'flex';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+
+    if (!list) return;
+
+    if (!notifs.length) {
+        list.innerHTML = '<div class="notif-empty"><i class="fas fa-bell-slash"></i><br>No notifications yet</div>';
+        return;
+    }
+
+    list.innerHTML = notifs.slice(0, 20).map(n => `
+        <div class="notif-item ${!n.isRead ? 'unread' : ''}" data-id="${n._id || ''}">
+            <div class="notif-item-title">${escapeHTML(n.title)}</div>
+            <div class="notif-item-body">${escapeHTML(n.body)}</div>
+            <div class="notif-item-time">${timeAgo(n.createdAt)}</div>
+        </div>
+    `).join('');
+}
+
+// ─── Socket.IO ────────────────────────────────────────────────────────────────
+function initSocket() {
+    if (typeof io !== 'function') return;
+
+    socket = io();
+
+    socket.on('connect', () => {
+        const dot  = document.getElementById('liveDot');
+        const text = document.getElementById('liveText');
+        if (dot)  { dot.classList.remove('offline'); }
+        if (text) text.textContent = 'Live';
+
+        // Join personal room for targeted notifications
+        socket.emit('join:user', currentUser.id);
+        socket.emit('join:role', currentUser.role);
+    });
+
+    socket.on('disconnect', () => {
+        const dot  = document.getElementById('liveDot');
+        const text = document.getElementById('liveText');
+        if (dot)  dot.classList.add('offline');
+        if (text) text.textContent = 'Offline';
+    });
+
+    socket.on('report:new', (report) => {
+        if (report.reportedBy?.userId === currentUser.id) {
+            fetchReports();
+            fetchStats();
+        }
+        if (window.showToast) window.showToast(`📍 New report: ${report.title}`, 'info');
+    });
+
+    socket.on('report:updated', (report) => {
+        // Update in-place without full re-fetch
+        const idx = allReports.findIndex(r => r.id === report.id);
+        if (idx !== -1) {
+            allReports[idx] = normalizeReport(report);
+            applyClientFiltersAndRender();
+        }
+        if (window.showToast) window.showToast(`🔄 Report status updated → ${report.status}`, 'success');
+        fetchStats();
+    });
+
+    socket.on('report:upvoted', ({ id, upvotes }) => {
+        const countEl = document.getElementById(`upvote-count-${id}`);
+        if (countEl) countEl.textContent = upvotes;
+    });
+
+    socket.on('notification:new', (notif) => {
+        fetchNotifications();
+        if (window.showToast) window.showToast(`🔔 ${notif.title || 'New notification'}`, 'info');
+    });
+}
+
+// ─── Upvote ───────────────────────────────────────────────────────────────────
+async function handleUpvote(id, btn) {
+    const upvotedLocal = new Set(JSON.parse(localStorage.getItem('upvoted_reports') || '[]'));
+
+    try {
+        const data = await api.patch(`/reports/${id}/upvote`, {});
+        const countEl = document.getElementById(`upvote-count-${id}`);
+        if (countEl) countEl.textContent = data.upvotes;
+
+        if (data.isUpvoted) {
+            upvotedLocal.add(id.toString());
+            btn.classList.add('voted');
+            if (window.showToast) window.showToast('✅ Upvoted!', 'success');
+        } else {
+            upvotedLocal.delete(id.toString());
+            btn.classList.remove('voted');
+        }
+
+        localStorage.setItem('upvoted_reports', JSON.stringify([...upvotedLocal]));
+    } catch (err) {
+        if (window.showToast) window.showToast(err.message || 'Upvote failed.', 'error');
+    }
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function normalizeReport(r) {
+    return { ...r, id: r.id ?? r._id, createdAt: r.createdAt || r.created_at || new Date().toISOString() };
+}
+
+function escapeHTML(str) {
+    if (!str) return '';
+    return String(str).replace(/[&<>'"/]/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;', '/': '&#x2F;'
+    }[c]));
+}
+
+function formatRole(role) {
+    return {
+        citizen: 'Citizen',
+        municipal_officer: 'Municipal Officer',
+        inspector: 'Inspector',
+        zone_manager: 'Zone Manager',
+        super_admin: 'Super Admin',
+        admin: 'Admin'
+    }[role] || role;
+}
+
+function timeAgo(dateStr) {
+    if (!dateStr) return '';
+    const diff = (Date.now() - new Date(dateStr)) / 1000;
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    return `${Math.floor(diff / 86400)}d ago`;
+}
+
+function showSkeletonCards() {
+    const grid = document.getElementById('reportsGrid');
+    if (!grid) return;
+    grid.innerHTML = Array(3).fill(`
+        <div class="skeleton-card">
+            <div class="skeleton skeleton-img"></div>
+            <div class="skeleton-body">
+                <div class="skeleton skeleton-title w80"></div>
+                <div class="skeleton skeleton-line w60"></div>
+                <div class="skeleton skeleton-line w40"></div>
+            </div>
+        </div>`).join('');
+}
+
+function showError(msg) {
+    const grid = document.getElementById('reportsGrid');
+    if (grid) {
+        grid.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon" style="color: #ef4444;"><i class="fas fa-exclamation-triangle"></i></div>
+                <div class="empty-title">Could Not Load Reports</div>
+                <div class="empty-sub">${escapeHTML(msg)}</div>
+                <div class="empty-actions">
+                    <button class="btn btn-primary" onclick="fetchReports()">
+                        <i class="fas fa-refresh"></i> Try Again
+                    </button>
+                </div>
+            </div>`;
+    }
 }

@@ -1,0 +1,193 @@
+[2026-07-10 14:26:41] INFO: Connected to MongoDB: roadfix
+[2026-07-10 14:26:41] INFO: Database indexes ensured
+[2026-07-10 14:26:41] INFO: Zones and wards seeded (Zone A–D, Wards 1–16)
+[2026-07-10 14:26:41] INFO: RoadFix server running on port 3000
+[2026-07-10 14:26:41] INFO: Environment: development
+[2026-07-10 14:26:41] INFO: Dashboard: http://localhost:3000
+[2026-07-10 14:26:58] INFO: Connected to MongoDB: roadfix
+[2026-07-10 14:26:58] INFO: Database indexes ensured
+[2026-07-10 14:26:58] INFO: RoadFix server running on port 3000
+[2026-07-10 14:26:58] INFO: Environment: development
+[2026-07-10 14:26:58] INFO: Dashboard: http://localhost:3000
+[2026-07-10 15:28:53] INFO: Connected to MongoDB: roadfix
+[2026-07-10 15:28:53] INFO: Connected to MongoDB: roadfix
+[2026-07-10 15:28:53] INFO: Database indexes ensured
+[2026-07-10 15:28:53] INFO: Database indexes ensured
+[2026-07-10 15:28:54] INFO: RoadFix server running on port 3000
+[2026-07-10 15:28:54] INFO: Environment: development
+[2026-07-10 15:28:54] INFO: Dashboard: http://localhost:3000
+[2026-07-10 15:30:00] INFO: Connected to MongoDB: roadfix
+[2026-07-10 15:30:00] INFO: Database indexes ensured
+[2026-07-10 15:30:00] INFO: RoadFix server running on port 3000
+[2026-07-10 15:30:00] INFO: Environment: development
+[2026-07-10 15:30:00] INFO: Dashboard: http://localhost:3000
+[2026-07-10 15:37:11] INFO: Connected to MongoDB: roadfix
+[2026-07-10 15:37:11] INFO: Database indexes ensured
+[2026-07-10 15:38:28] INFO: Connected to MongoDB: roadfix
+[2026-07-10 15:38:28] INFO: Database indexes ensured
+[2026-07-10 15:38:28] INFO: RoadFix server running on port 3000
+[2026-07-10 15:38:28] INFO: Environment: development
+[2026-07-10 15:38:28] INFO: Dashboard: http://localhost:3000
+[2026-07-10 15:40:08] INFO: Login: citizen@roadfix.com (citizen)
+[2026-07-10 15:40:14] INFO: Socket connected: fjCJElrJnyRLUYXTAAAB
+[2026-07-10 15:40:14] INFO: Socket fjCJElrJnyRLUYXTAAAB joined room: user:user_citizen_001
+[2026-07-10 15:40:14] INFO: Socket fjCJElrJnyRLUYXTAAAB joined room: role:citizen
+[2026-07-10 15:46:45] INFO: Socket connected: HzXVOPMvc3hXoGfgAAAD
+[2026-07-10 15:46:45] INFO: Socket HzXVOPMvc3hXoGfgAAAD joined room: user:user_citizen_001
+[2026-07-10 15:46:45] INFO: Socket HzXVOPMvc3hXoGfgAAAD joined room: role:citizen
+[2026-07-10 15:47:01] INFO: Logout: citizen@roadfix.com
+[2026-07-10 15:47:05] INFO: Socket disconnected: fjCJElrJnyRLUYXTAAAB
+[2026-07-10 15:47:05] INFO: Socket disconnected: HzXVOPMvc3hXoGfgAAAD
+[2026-07-10 15:59:38] INFO: Connected to MongoDB: roadfix
+[2026-07-10 15:59:38] INFO: Database indexes ensured
+[2026-07-10 15:59:39] INFO: RoadFix server running on port 3000
+[2026-07-10 15:59:39] INFO: Environment: development
+[2026-07-10 15:59:39] INFO: Dashboard: http://localhost:3000
+[2026-07-10 16:07:09] INFO: Login: admin@roadfix.com (super_admin)
+[2026-07-10 16:15:39] INFO: Connected to MongoDB: roadfix
+[2026-07-10 16:15:39] INFO: Database indexes ensured
+[2026-07-10 16:15:39] INFO: RoadFix server running on port 3000
+[2026-07-10 16:15:39] INFO: Environment: development
+[2026-07-10 16:15:39] INFO: Dashboard: http://localhost:3000
+[2026-08-19 10:50:50] INFO: Connected to MongoDB: roadfix
+[2026-08-19 10:50:50] INFO: Database indexes ensured
+[2026-08-19 10:50:50] INFO: RoadFix server running on port 3000
+[2026-08-19 10:50:50] INFO: Environment: development
+[2026-08-19 10:50:50] INFO: Dashboard: http://localhost:3000
+[2026-08-19 10:58:27] INFO: Connected to MongoDB: roadfix
+[2026-08-19 10:58:27] INFO: Database indexes ensured
+[2026-08-19 10:59:30] INFO: Connected to MongoDB: roadfix
+[2026-08-19 10:59:30] INFO: Database indexes ensured
+[2026-08-19 11:00:00] INFO: Connected to MongoDB: roadfix
+[2026-08-19 11:00:00] INFO: Database indexes ensured
+[2026-08-19 11:00:00] INFO: RoadFix server running on port 3000
+[2026-08-19 11:00:00] INFO: Environment: development
+[2026-08-19 11:00:00] INFO: Dashboard: http://localhost:3000
+[2026-08-19 11:00:25] INFO: Connected to MongoDB: roadfix
+[2026-08-19 11:00:25] INFO: Database indexes ensured
+[2026-08-19 11:03:05] INFO: Connected to MongoDB: roadfix
+[2026-08-19 11:03:05] INFO: Database indexes ensured
+[2026-08-19 11:04:04] INFO: Connected to MongoDB: roadfix
+[2026-08-19 11:04:05] INFO: Database indexes ensured
+[2026-08-19 11:04:05] INFO: RoadFix server running on port 3000
+[2026-08-19 11:04:05] INFO: Environment: development
+[2026-08-19 11:04:05] INFO: Dashboard: http://localhost:3000
+[2026-08-19 11:17:55] INFO: Connected to MongoDB: roadfix
+[2026-08-19 11:17:55] INFO: Database indexes ensured
+[2026-08-19 11:17:55] INFO: RoadFix server running on port 3000
+[2026-08-19 11:17:55] INFO: Environment: development
+[2026-08-19 11:17:55] INFO: Dashboard: http://localhost:3000
+[2026-08-19 11:17:58] INFO: Connected to MongoDB: roadfix
+[2026-08-19 11:17:58] INFO: Database indexes ensured
+[2026-08-19 11:18:23] INFO: Connected to MongoDB: roadfix
+[2026-08-19 11:18:23] INFO: Database indexes ensured
+[2026-08-19 11:18:23] INFO: RoadFix server running on port 3000
+[2026-08-19 11:18:23] INFO: Environment: development
+[2026-08-19 11:18:23] INFO: Dashboard: http://localhost:3000
+[2026-08-19 11:23:45] INFO: Connected to MongoDB: roadfix
+[2026-08-19 11:23:45] INFO: Database indexes ensured
+[2026-08-19 11:24:38] INFO: Connected to MongoDB: roadfix
+[2026-08-19 11:24:38] INFO: Database indexes ensured
+[2026-08-19 11:24:38] INFO: RoadFix server running on port 3000
+[2026-08-19 11:24:38] INFO: Environment: development
+[2026-08-19 11:24:38] INFO: Dashboard: http://localhost:3000
+[2026-08-19 11:26:14] INFO: Connected to MongoDB: roadfix
+[2026-08-19 11:26:14] INFO: Database indexes ensured
+[2026-08-19 11:26:14] INFO: RoadFix server running on port 3000
+[2026-08-19 11:26:14] INFO: Environment: development
+[2026-08-19 11:26:14] INFO: Dashboard: http://localhost:3000
+[2026-08-19 11:27:52] INFO: Connected to MongoDB: roadfix
+[2026-08-19 11:27:52] INFO: Connected to MongoDB: roadfix
+[2026-08-19 11:27:52] INFO: Database indexes ensured
+[2026-08-19 11:27:52] INFO: Database indexes ensured
+[2026-08-19 11:27:52] INFO: RoadFix server running on port 3000
+[2026-08-19 11:27:52] INFO: Environment: development
+[2026-08-19 11:27:52] INFO: Dashboard: http://localhost:3000
+[2026-08-19 11:27:52] INFO: Connected to MongoDB: roadfix
+[2026-08-19 11:27:52] INFO: Database indexes ensured
+[2026-08-19 11:28:13] INFO: Connected to MongoDB: roadfix
+[2026-08-19 11:28:13] INFO: Database indexes ensured
+[2026-08-19 11:28:52] INFO: Connected to MongoDB: roadfix
+[2026-08-19 11:28:52] INFO: Database indexes ensured
+[2026-08-19 11:28:52] INFO: RoadFix server running on port 3000
+[2026-08-19 11:28:52] INFO: Environment: development
+[2026-08-19 11:28:52] INFO: Dashboard: http://localhost:3000
+[2026-08-19 11:29:10] INFO: Connected to MongoDB: roadfix
+[2026-08-19 11:29:10] INFO: Connected to MongoDB: roadfix
+[2026-08-19 11:29:10] INFO: Database indexes ensured
+[2026-08-19 11:29:10] INFO: Connected to MongoDB: roadfix
+[2026-08-19 11:29:10] INFO: Database indexes ensured
+[2026-08-19 11:29:10] INFO: RoadFix server running on port 3000
+[2026-08-19 11:29:10] INFO: Environment: development
+[2026-08-19 11:29:10] INFO: Dashboard: http://localhost:3000
+[2026-08-19 11:29:10] INFO: Database indexes ensured
+[2026-08-19 11:29:10] INFO: Connected to MongoDB: roadfix
+[2026-08-19 11:29:10] INFO: Database indexes ensured
+[2026-08-19 11:30:07] INFO: Login: rashmijoshi369@gmail.com (citizen)
+[2026-08-19 11:30:09] INFO: Socket connected: vo2GxK0oYY5P_NQkAAAB
+[2026-08-19 11:30:09] INFO: Socket vo2GxK0oYY5P_NQkAAAB joined room: user:user_rashmi_001
+[2026-08-19 11:30:09] INFO: Socket vo2GxK0oYY5P_NQkAAAB joined room: role:citizen
+[2026-08-19 11:30:30] INFO: Socket disconnected: vo2GxK0oYY5P_NQkAAAB
+[2026-08-19 11:30:30] INFO: Socket connected: Nklo1TB3JXQJoY2wAAAD
+[2026-08-19 11:30:30] INFO: Socket Nklo1TB3JXQJoY2wAAAD joined room: user:user_rashmi_001
+[2026-08-19 11:30:30] INFO: Socket Nklo1TB3JXQJoY2wAAAD joined room: role:citizen
+[2026-08-19 11:30:46] INFO: Socket disconnected: Nklo1TB3JXQJoY2wAAAD
+[2026-08-19 11:30:47] INFO: Socket connected: LZRWovQLNr85CQ5YAAAF
+[2026-08-19 11:30:47] INFO: Socket LZRWovQLNr85CQ5YAAAF joined room: user:user_rashmi_001
+[2026-08-19 11:30:47] INFO: Socket LZRWovQLNr85CQ5YAAAF joined room: role:citizen
+[2026-08-19 11:31:32] INFO: Socket disconnected: LZRWovQLNr85CQ5YAAAF
+[2026-08-19 11:37:32] INFO: Socket connected: NXkbfqwxdShtpd4JAAAH
+[2026-08-19 11:37:32] INFO: Socket NXkbfqwxdShtpd4JAAAH joined room: role:citizen
+[2026-08-19 11:37:32] INFO: Socket NXkbfqwxdShtpd4JAAAH joined room: user:user_rashmi_001
+[2026-08-19 11:37:44] INFO: Socket connected: 61s5U3IDoV-1b6pPAAAJ
+[2026-08-19 11:37:44] INFO: Socket 61s5U3IDoV-1b6pPAAAJ joined room: user:user_rashmi_001
+[2026-08-19 11:37:44] INFO: Socket 61s5U3IDoV-1b6pPAAAJ joined room: role:citizen
+[2026-08-19 11:37:46] INFO: Socket connected: R3D5YmMGna9WCoeXAAAL
+[2026-08-19 11:37:46] INFO: Socket R3D5YmMGna9WCoeXAAAL joined room: role:citizen
+[2026-08-19 11:37:46] INFO: Socket R3D5YmMGna9WCoeXAAAL joined room: user:user_rashmi_001
+[2026-08-19 11:38:00] INFO: Socket connected: Ri1v71zoYTvN6aneAAAN
+[2026-08-19 11:38:00] INFO: Socket Ri1v71zoYTvN6aneAAAN joined room: user:user_rashmi_001
+[2026-08-19 11:38:00] INFO: Socket Ri1v71zoYTvN6aneAAAN joined room: role:citizen
+[2026-08-19 11:38:17] INFO: Socket disconnected: NXkbfqwxdShtpd4JAAAH
+[2026-08-19 11:38:29] INFO: Socket disconnected: 61s5U3IDoV-1b6pPAAAJ
+[2026-08-19 11:38:31] INFO: Socket disconnected: R3D5YmMGna9WCoeXAAAL
+[2026-08-19 11:38:45] INFO: Socket disconnected: Ri1v71zoYTvN6aneAAAN
+[2026-08-19 11:42:20] INFO: Connected to MongoDB: roadfix
+[2026-08-19 11:42:20] INFO: Database indexes ensured
+[2026-08-19 11:42:20] INFO: RoadFix server running on port 3000
+[2026-08-19 11:42:20] INFO: Environment: development
+[2026-08-19 11:42:20] INFO: Dashboard: http://localhost:3000
+[2026-08-19 11:42:25] INFO: Socket connected: deuHzMH7J9yie6f8AAAB
+[2026-08-19 11:42:25] INFO: Socket deuHzMH7J9yie6f8AAAB joined room: user:user_rashmi_001
+[2026-08-19 11:42:25] INFO: Socket deuHzMH7J9yie6f8AAAB joined room: role:citizen
+[2026-08-19 11:42:29] INFO: Socket connected: RJJQWA4fZnjXZAVaAAAD
+[2026-08-19 11:42:29] INFO: Socket RJJQWA4fZnjXZAVaAAAD joined room: role:citizen
+[2026-08-19 11:42:29] INFO: Socket RJJQWA4fZnjXZAVaAAAD joined room: user:user_rashmi_001
+[2026-08-19 11:42:32] INFO: Socket connected: Sp9p0RI4a3NWT7QvAAAF
+[2026-08-19 11:42:32] INFO: Socket Sp9p0RI4a3NWT7QvAAAF joined room: user:user_rashmi_001
+[2026-08-19 11:42:32] INFO: Socket Sp9p0RI4a3NWT7QvAAAF joined room: role:citizen
+[2026-08-19 11:42:33] INFO: Socket connected: OEy2N4omVIXujbMcAAAH
+[2026-08-19 11:42:33] INFO: Socket OEy2N4omVIXujbMcAAAH joined room: user:user_rashmi_001
+[2026-08-19 11:42:33] INFO: Socket OEy2N4omVIXujbMcAAAH joined room: role:citizen
+[2026-08-19 11:42:45] INFO: Socket disconnected: OEy2N4omVIXujbMcAAAH
+[2026-08-19 11:42:45] INFO: Socket disconnected: Sp9p0RI4a3NWT7QvAAAF
+[2026-08-19 11:42:45] INFO: Socket disconnected: RJJQWA4fZnjXZAVaAAAD
+[2026-08-19 11:42:45] INFO: Socket disconnected: deuHzMH7J9yie6f8AAAB
+[2026-08-19 11:42:58] INFO: Socket connected: BkJsVf9VdfEyXru9AAAJ
+[2026-08-19 11:42:58] INFO: Socket BkJsVf9VdfEyXru9AAAJ joined room: user:user_rashmi_001
+[2026-08-19 11:42:58] INFO: Socket BkJsVf9VdfEyXru9AAAJ joined room: role:citizen
+[2026-08-19 11:43:07] INFO: Socket connected: DkvE0as1t5WJoL_VAAAL
+[2026-08-19 11:43:07] INFO: Socket DkvE0as1t5WJoL_VAAAL joined room: role:citizen
+[2026-08-19 11:43:07] INFO: Socket DkvE0as1t5WJoL_VAAAL joined room: user:user_rashmi_001
+[2026-08-19 11:43:43] INFO: Socket disconnected: BkJsVf9VdfEyXru9AAAJ
+[2026-08-19 11:48:26] INFO: Connected to MongoDB: roadfix
+[2026-08-19 11:48:26] INFO: Database indexes ensured
+[2026-08-19 11:48:55] INFO: Connected to MongoDB: roadfix
+[2026-08-19 11:48:55] INFO: Database indexes ensured
+[2026-08-19 11:48:55] INFO: RoadFix server running on port 3000
+[2026-08-19 11:48:55] INFO: Environment: development
+[2026-08-19 11:48:55] INFO: Dashboard: http://localhost:3000
+[2026-08-19 11:48:55] INFO: Socket connected: Ehfj7QaW7h9KZyBzAAAB
+[2026-08-19 11:48:55] INFO: Socket Ehfj7QaW7h9KZyBzAAAB joined room: role:citizen
+[2026-08-19 11:48:55] INFO: Socket Ehfj7QaW7h9KZyBzAAAB joined room: user:user_rashmi_001
+[2026-08-19 11:50:54] INFO: Socket disconnected: Ehfj7QaW7h9KZyBzAAAB

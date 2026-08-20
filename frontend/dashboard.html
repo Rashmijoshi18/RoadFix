@@ -1,207 +1,767 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard - RoadFix</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
-    <script src="js/theme.js?v=1.0.1"></script>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-    />
-    <link rel="stylesheet" href="css/style.css?v=1.0.1" />
-  </head>
-  <body class="premium-ui">
-    <div class="mesh-bg"></div>
-    <nav class="navbar">
-      <div class="container nav-container">
-        <a href="index.html" class="logo"
-          ><i class="fas fa-road"></i> RoadFix</a
-        >
-        <div class="nav-right">
-          <ul class="nav-links">
-            <li><a href="index.html">Home</a></li>
-            <li><a href="about.html">About</a></li>
-            <li><a href="report.html">Report Issue</a></li>
-            <li><a href="dashboard.html" class="active">Dashboard</a></li>
-            <li><a href="faq.html">FAQ</a></li>
-            <li><a href="contact.html">Contact</a></li>
-            <li id="auditNavLink" style="display: none">
-              <a href="audit.html">Audit Log</a>
-            </li>
-          </ul>
-          <div class="nav-user-info" id="navUserInfo"></div>
-          <div class="live-indicator">
-            <div class="live-dot offline" id="liveDot"></div>
-            <span id="liveText">Offline</span>
-          </div>
-          <button
-            class="theme-toggle"
-            onclick="toggleTheme()"
-            aria-label="Toggle Theme"
-          >
-            <i class="fas fa-moon" id="theme-icon"></i>
-          </button>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Dashboard — RoadFix</title>
+  <meta name="description" content="Track your road complaints, view status updates, and manage your reports on RoadFix." />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script src="js/theme.js"></script>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* ── Dashboard Page Styles ── */
+    .dash-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: calc(100vh - 64px);
+    }
+    @media(max-width: 900px) {
+      .dash-layout { grid-template-columns: 1fr; }
+      .dash-sidebar { display: none; }
+    }
+
+    /* Sidebar */
+    .dash-sidebar {
+      background: var(--bg-white);
+      border-right: 1px solid var(--border);
+      padding: 1.5rem 0;
+      position: sticky;
+      top: 64px;
+      height: calc(100vh - 64px);
+      overflow-y: auto;
+    }
+    .sidebar-user {
+      padding: 1rem 1.5rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1rem;
+    }
+    .sidebar-avatar {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #2563eb, #6366f1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+    }
+    .sidebar-name { font-weight: 700; font-size: 0.95rem; color: var(--text-dark); }
+    .sidebar-role-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 0.25rem;
+    }
+    .role-citizen { background: rgba(16,185,129,0.12); color: #059669; }
+    .sidebar-nav { list-style: none; padding: 0; margin: 0; }
+    .sidebar-nav-item a {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.5rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 0.9rem;
+      text-decoration: none;
+      border-left: 3px solid transparent;
+      transition: all 0.15s ease;
+    }
+    .sidebar-nav-item a:hover, .sidebar-nav-item a.active {
+      color: var(--primary);
+      background: rgba(37,99,235,0.06);
+      border-left-color: var(--primary);
+    }
+    .sidebar-nav-item a i { width: 18px; text-align: center; }
+
+    /* Main content */
+    .dash-main { padding: 2rem; min-width: 0; }
+    .dash-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .dash-topbar h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin: 0;
+    }
+    .dash-topbar h1 span { color: var(--primary); }
+    .dash-topbar-actions { display: flex; align-items: center; gap: 0.75rem; }
+
+    /* Stat cards */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card-v2 {
+      background: var(--bg-white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.25rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card-v2::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+    .stat-card-v2.total::before { background: linear-gradient(90deg, #2563eb, #6366f1); }
+    .stat-card-v2.reported::before { background: linear-gradient(90deg, #f59e0b, #f97316); }
+    .stat-card-v2.progress::before { background: linear-gradient(90deg, #3b82f6, #06b6d4); }
+    .stat-card-v2.resolved::before { background: linear-gradient(90deg, #10b981, #22c55e); }
+    .stat-card-v2:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
+    .stat-card-v2.active { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    .stat-icon-v2 {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+    }
+    .stat-icon-v2.total { background: rgba(37,99,235,0.1); color: #2563eb; }
+    .stat-icon-v2.reported { background: rgba(245,158,11,0.1); color: #f59e0b; }
+    .stat-icon-v2.progress { background: rgba(59,130,246,0.1); color: #3b82f6; }
+    .stat-icon-v2.resolved { background: rgba(16,185,129,0.1); color: #10b981; }
+    .stat-number { font-size: 2rem; font-weight: 800; color: var(--text-dark); line-height: 1; margin-bottom: 0.3rem; }
+    .stat-label { font-size: 0.82rem; color: var(--text-muted); font-weight: 500; }
+
+    /* Rewards widget */
+    .rewards-widget {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .rewards-level {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .rewards-icon { font-size: 2rem; }
+    .rewards-info { }
+    .rewards-level-name { font-weight: 800; font-size: 1rem; color: white; }
+    .rewards-points { font-size: 0.82rem; color: #94a3b8; }
+    .rewards-progress-wrap { flex: 1; min-width: 150px; }
+    .rewards-progress-label { font-size: 0.75rem; color: #94a3b8; margin-bottom: 0.4rem; }
+    .rewards-progress-bar {
+      height: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .rewards-progress-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, #38bdf8, #818cf8);
+      transition: width 1s ease;
+    }
+    .rewards-btn {
+      padding: 0.5rem 1rem;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      color: white;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    .rewards-btn:hover { background: rgba(255,255,255,0.18); }
+
+    /* Filter bar */
+    .filter-bar {
+      background: var(--bg-white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .filter-bar input, .filter-bar select {
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem 0.8rem;
+      font-size: 0.88rem;
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg-white);
+      color: var(--text-dark);
+      transition: border-color 0.2s;
+    }
+    .filter-bar input:focus, .filter-bar select:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    .filter-bar input { min-width: 200px; flex: 1; }
+    .filter-bar-actions { margin-left: auto; display: flex; gap: 0.5rem; }
+    .results-meta-v2 {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Report cards v2 */
+    .reports-grid-v2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.25rem;
+    }
+    .report-card-v2 {
+      background: var(--bg-white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      transition: all 0.2s ease;
+    }
+    .report-card-v2:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.09);
+      border-color: rgba(37,99,235,0.2);
+    }
+    .report-card-img {
+      height: 160px;
+      object-fit: cover;
+      width: 100%;
+      display: block;
+      background: var(--bg-page);
+    }
+    .report-card-img-placeholder {
+      height: 160px;
+      background: linear-gradient(135deg, var(--bg-page), var(--border));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 2rem;
+    }
+    .report-card-body { padding: 1.1rem; }
+    .report-card-tags {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.65rem;
+      flex-wrap: wrap;
+    }
+    .tag {
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .tag-reported { background: rgba(245,158,11,0.12); color: #d97706; }
+    .tag-verified { background: rgba(59,130,246,0.12); color: #2563eb; }
+    .tag-assigned { background: rgba(139,92,246,0.12); color: #7c3aed; }
+    .tag-inprogress { background: rgba(6,182,212,0.12); color: #0891b2; }
+    .tag-completed { background: rgba(16,185,129,0.12); color: #059669; }
+    .tag-closed { background: rgba(100,116,139,0.12); color: #475569; }
+    .tag-category { background: var(--bg-page); color: var(--text-muted); border: 1px solid var(--border); }
+    .priority-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 4px;
+    }
+    .priority-low { background: #10b981; }
+    .priority-medium { background: #f59e0b; }
+    .priority-high { background: #f97316; }
+    .priority-critical { background: #ef4444; animation: blink 1s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .report-card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 0.4rem;
+      line-height: 1.3;
+    }
+    .report-card-meta {
+      display: flex;
+      gap: 0.85rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .report-card-meta i { margin-right: 0.3rem; }
+    .report-card-desc {
+      font-size: 0.87rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 0.9rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* Status Timeline */
+    .timeline-toggle {
+      font-size: 0.8rem;
+      color: var(--primary);
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-bottom: 0.75rem;
+    }
+    .timeline {
+      display: none;
+      margin-bottom: 0.75rem;
+    }
+    .timeline.open { display: block; }
+    .timeline-step {
+      display: flex;
+      gap: 0.75rem;
+      position: relative;
+      padding-bottom: 0.75rem;
+    }
+    .timeline-step:not(:last-child)::before {
+      content: '';
+      position: absolute;
+      left: 8px;
+      top: 20px;
+      bottom: 0;
+      width: 2px;
+      background: var(--border);
+    }
+    .timeline-dot {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: var(--bg-white);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .timeline-dot.done { background: var(--primary); border-color: var(--primary); }
+    .timeline-content { }
+    .timeline-status { font-size: 0.82rem; font-weight: 700; color: var(--text-dark); }
+    .timeline-meta { font-size: 0.74rem; color: var(--text-muted); }
+    .timeline-note { font-size: 0.76rem; color: var(--text-muted); font-style: italic; margin-top: 0.2rem; }
+
+    /* Report actions */
+    .report-card-footer {
+      border-top: 1px solid var(--border);
+      padding: 0.75rem 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .btn-upvote-v2 {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.4rem 0.8rem;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      background: none;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 600;
+      font-family: 'Outfit', sans-serif;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+    }
+    .btn-upvote-v2:hover, .btn-upvote-v2.voted {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: rgba(37,99,235,0.05);
+    }
+    .btn-upvote-v2.voted { background: rgba(37,99,235,0.1); }
+
+    /* SLA badge */
+    .sla-badge {
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .sla-breached { background: rgba(239,68,68,0.12); color: #dc2626; }
+    .sla-due-soon { background: rgba(245,158,11,0.12); color: #d97706; }
+    .sla-ok { background: rgba(16,185,129,0.1); color: #059669; }
+
+    /* Empty state */
+    .empty-state {
+      grid-column: 1/-1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem 2rem;
+      background: var(--bg-white);
+      border: 1px dashed var(--border);
+      border-radius: 16px;
+      text-align: center;
+    }
+    .empty-icon {
+      font-size: 3.5rem;
+      color: var(--border);
+      margin-bottom: 1rem;
+    }
+    .empty-title { font-size: 1.25rem; font-weight: 700; color: var(--text-dark); margin-bottom: 0.5rem; }
+    .empty-sub { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .empty-actions { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+
+    /* Skeleton loading */
+    .skeleton {
+      background: linear-gradient(90deg, var(--bg-page) 25%, var(--border) 50%, var(--bg-page) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 8px;
+    }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .skeleton-card {
+      background: var(--bg-white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .skeleton-img { height: 160px; }
+    .skeleton-body { padding: 1.1rem; }
+    .skeleton-line { height: 12px; margin-bottom: 0.6rem; }
+    .skeleton-line.w80 { width: 80%; }
+    .skeleton-line.w60 { width: 60%; }
+    .skeleton-line.w40 { width: 40%; }
+    .skeleton-title { height: 18px; margin-bottom: 0.75rem; }
+
+    /* Notification bell */
+    .notif-btn {
+      position: relative;
+      background: var(--bg-white);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      width: 40px; height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-dark);
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+    .notif-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .notif-badge {
+      position: absolute;
+      top: -5px; right: -5px;
+      background: #ef4444;
+      color: white;
+      border-radius: 10px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      min-width: 16px; height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 3px;
+    }
+    .notif-panel {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 340px;
+      background: var(--bg-white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+      z-index: 200;
+      display: none;
+      overflow: hidden;
+    }
+    .notif-panel.open { display: block; }
+    .notif-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .notif-panel-title { font-weight: 700; font-size: 0.9rem; color: var(--text-dark); }
+    .notif-mark-all {
+      font-size: 0.78rem;
+      color: var(--primary);
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+    }
+    .notif-list { max-height: 320px; overflow-y: auto; }
+    .notif-item {
+      padding: 0.85rem 1.1rem;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .notif-item:hover { background: var(--bg-page); }
+    .notif-item.unread { background: rgba(37,99,235,0.03); }
+    .notif-item-title { font-size: 0.85rem; font-weight: 600; color: var(--text-dark); margin-bottom: 0.2rem; }
+    .notif-item-body { font-size: 0.78rem; color: var(--text-muted); }
+    .notif-item-time { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.25rem; }
+    .notif-empty { padding: 2rem; text-align: center; color: var(--text-muted); font-size: 0.85rem; }
+    .notif-wrap { position: relative; }
+
+    /* Live indicator */
+    .live-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      padding: 0.35rem 0.7rem;
+      background: var(--bg-page);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+    }
+    .live-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      animation: livePulse 2s infinite;
+    }
+    .live-dot.offline { background: #94a3b8; animation: none; }
+    @keyframes livePulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.4)} }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container nav-container">
+      <a href="index.html" class="logo"><i class="fas fa-road"></i> RoadFix</a>
+      <div class="nav-right">
+        <ul class="nav-links" id="navLinks">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="report.html">Report Issue</a></li>
+          <li><a href="dashboard.html" class="active">My Reports</a></li>
+        </ul>
+        <div id="navUserInfo" class="nav-user-info"></div>
+        <div class="live-indicator" id="liveIndicator">
+          <div class="live-dot offline" id="liveDot"></div>
+          <span id="liveText">Offline</span>
         </div>
-      </div>
-    </nav>
-
-    <!-- Auth guard + nav user display -->
-    <script>
-      (function () {
-        const role = localStorage.getItem("userRole");
-        const name = localStorage.getItem("userName");
-        if (!role) {
-          window.location.href = "login.html";
-          return;
-        }
-        if (role === "admin") {
-          const auditLink = document.getElementById("auditNavLink");
-          if (auditLink) auditLink.style.display = "block";
-        }
-
-        const info = document.getElementById("navUserInfo");
-        if (info) {
-          info.innerHTML =
-            '<button class="btn-logout" id="logoutBtn" title="Logout" aria-label="Logout"><i class="fas fa-sign-out-alt"></i></button>';
-        }
-
-        window.handleLogout = async function () {
-          try {
-            await fetch("/api/auth/logout", {
-              method: "POST",
-              headers: {
-                "x-user-role": role || "unknown",
-                "x-user-id": localStorage.getItem("userId") || "unknown",
-                "x-user-name": name || "Unknown",
-              },
-            });
-          } catch (e) {
-            console.error("Logout error:", e);
-          }
-          localStorage.clear();
-          window.location.href = "login.html";
-        };
-
-        const logoutBtn = document.getElementById("logoutBtn");
-        if (logoutBtn) {
-          logoutBtn.addEventListener("click", window.handleLogout);
-        }
-      })();
-    </script>
-
-    <main class="container">
-      <header class="dashboard-header">
-        <div>
-          <h1>Dashboard<span>.</span></h1>
-          <p id="welcomeLine" class="dashboard-welcome-line"></p>
-        </div>
-        <button id="toggleGuide" class="btn-guide-toggle">
-          <i class="fas fa-question-circle"></i> Quick Guide
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Theme">
+          <i class="fas fa-moon" id="theme-icon"></i>
         </button>
-      </header>
+      </div>
+    </div>
+  </nav>
 
-      <section
-        id="dashboardHelp"
-        class="dashboard-help collapsed"
-        aria-label="How to use dashboard"
-      >
-        <div class="dashboard-help-grid">
-          <article class="help-card">
-            <h3>1. Find Issues Fast</h3>
-            <p>Use search and filters to narrow reports instantly.</p>
-          </article>
-          <article class="help-card">
-            <h3>2. Prioritize Smartly</h3>
-            <p>Sort by SLA Priority or Upvotes to handle impact first.</p>
-          </article>
-          <article class="help-card">
-            <h3>3. Take Action</h3>
-            <p id="roleActionTip">
-              Update and resolve reports based on your role.
-            </p>
-          </article>
+  <!-- Main layout -->
+  <div class="dash-layout container" style="padding-top: 1.5rem; padding-bottom: 3rem;">
+    <!-- Sidebar -->
+    <aside class="dash-sidebar" id="sidebar">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebarAvatar">?</div>
+        <div class="sidebar-name" id="sidebarName">Loading...</div>
+        <span class="sidebar-role-badge role-citizen" id="sidebarRole">Citizen</span>
+      </div>
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-item">
+          <a href="dashboard.html" class="active">
+            <i class="fas fa-tachometer-alt"></i> My Dashboard
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a href="report.html">
+            <i class="fas fa-plus-circle"></i> New Report
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a href="#" id="logoutSidebarBtn">
+            <i class="fas fa-sign-out-alt"></i> Sign Out
+          </a>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- Main -->
+    <main class="dash-main">
+      <!-- Top bar -->
+      <div class="dash-topbar">
+        <div>
+          <h1>My Reports<span>.</span></h1>
+          <p id="welcomeLine" style="color: var(--text-muted); font-size: 0.9rem; margin: 0;"></p>
         </div>
-      </section>
-
-      <section id="statsContainer" class="stats-container">
-        <!-- Stats inserted via JS -->
-      </section>
-
-      <section class="dashboard-controls" aria-label="Dashboard controls">
-        <div class="filter-group">
-          <div class="filter-item">
-            <label for="searchQuery"><i class="fas fa-search"></i></label>
-            <input
-              type="text"
-              id="searchQuery"
-              placeholder="Search reports..."
-            />
+        <div class="dash-topbar-actions">
+          <!-- Notifications bell -->
+          <div class="notif-wrap" id="notifWrap">
+            <button class="notif-btn" id="notifBtn" title="Notifications" aria-label="Open notifications">
+              <i class="fas fa-bell"></i>
+              <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+            </button>
+            <div class="notif-panel" id="notifPanel">
+              <div class="notif-panel-header">
+                <span class="notif-panel-title">Notifications</span>
+                <button class="notif-mark-all" id="markAllRead">Mark all read</button>
+              </div>
+              <div class="notif-list" id="notifList">
+                <div class="notif-empty"><i class="fas fa-bell-slash"></i><br>No notifications yet</div>
+              </div>
+            </div>
           </div>
-          <div class="filter-item">
-            <label for="filterCategory"><i class="fas fa-filter"></i></label>
-            <select id="filterCategory">
-              <option value="">All Categories</option>
-              <option value="Pothole">Pothole</option>
-              <option value="Blocked Drain">Blocked Drain</option>
-              <option value="Streetlight Issue">Streetlight Issue</option>
-              <option value="Faded Road Signs">Faded Road Signs</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-          <div class="filter-item">
-            <label for="filterStatus"><i class="fas fa-tasks"></i></label>
-            <select id="filterStatus">
-              <option value="">All Statuses</option>
-              <option value="sla-breached">SLA Breached</option>
-              <option value="Reported">Reported</option>
-              <option value="Pending">Pending</option>
-              <option value="Resolved">Resolved</option>
-            </select>
-          </div>
-          <div class="filter-item">
-            <label for="sortReports"
-              ><i class="fas fa-sort-amount-down"></i
-            ></label>
-            <select id="sortReports">
-              <option value="newest">Newest First</option>
-              <option value="oldest">Oldest First</option>
-              <option value="upvotes">Most Upvoted</option>
-              <option value="sla">SLA Priority</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="action-group">
           <a href="report.html" class="btn btn-primary btn-sm">
             <i class="fas fa-plus"></i> New Report
           </a>
-          <button id="clearFilters" class="btn-icon" title="Clear Filters">
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stat-grid" id="statsGrid">
+        <!-- Skeleton placeholders -->
+        <div class="skeleton-card">
+          <div class="skeleton-body">
+            <div class="skeleton skeleton-title w80"></div>
+            <div class="skeleton skeleton-line w60"></div>
+          </div>
+        </div>
+        <div class="skeleton-card">
+          <div class="skeleton-body">
+            <div class="skeleton skeleton-title w80"></div>
+            <div class="skeleton skeleton-line w60"></div>
+          </div>
+        </div>
+        <div class="skeleton-card">
+          <div class="skeleton-body">
+            <div class="skeleton skeleton-title w80"></div>
+            <div class="skeleton skeleton-line w60"></div>
+          </div>
+        </div>
+        <div class="skeleton-card">
+          <div class="skeleton-body">
+            <div class="skeleton skeleton-title w80"></div>
+            <div class="skeleton skeleton-line w60"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rewards widget -->
+      <div class="rewards-widget" id="rewardsWidget" style="display:none">
+        <div class="rewards-level">
+          <span class="rewards-icon" id="rewardsIcon">🥉</span>
+          <div class="rewards-info">
+            <div class="rewards-level-name" id="rewardsLevel">Bronze</div>
+            <div class="rewards-points" id="rewardsPoints">0 pts</div>
+          </div>
+        </div>
+        <div class="rewards-progress-wrap">
+          <div class="rewards-progress-label" id="rewardsNextLabel">Next: Silver at 100 pts</div>
+          <div class="rewards-progress-bar">
+            <div class="rewards-progress-fill" id="rewardsProgressFill" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="filter-bar">
+        <input type="text" id="searchQuery" placeholder="🔍 Search complaints..." />
+        <select id="filterStatus">
+          <option value="">All Statuses</option>
+          <option value="Reported">Reported</option>
+          <option value="Verified">Verified</option>
+          <option value="Assigned">Assigned</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Completed">Completed</option>
+          <option value="Closed">Closed</option>
+          <option value="sla-breached">⚠ SLA Breached</option>
+        </select>
+        <select id="filterCategory">
+          <option value="">All Categories</option>
+          <option value="Pothole">Pothole</option>
+          <option value="Blocked Drain">Blocked Drain</option>
+          <option value="Streetlight Issue">Streetlight Issue</option>
+          <option value="Faded Road Signs">Faded Road Signs</option>
+          <option value="Road Damage">Road Damage</option>
+          <option value="Other">Other</option>
+        </select>
+        <select id="sortReports">
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
+          <option value="upvotes">Most Upvoted</option>
+          <option value="sla">SLA Priority</option>
+        </select>
+        <div class="filter-bar-actions">
+          <button id="clearFilters" class="btn-icon" title="Reset filters" style="padding: 0.5rem 0.75rem;">
             <i class="fas fa-rotate-left"></i>
           </button>
         </div>
-      </section>
-
-      <div id="resultsMeta" class="results-meta" aria-live="polite"></div>
-
-      <!-- Loader -->
-      <div id="loader" style="display: none">
-        <div class="spinner"></div>
       </div>
 
-      <section class="reports-grid" id="reportsGrid">
-        <!-- Dynamic Report Cards injected here via JS -->
-      </section>
-    </main>
+      <div class="results-meta-v2" id="resultsMeta"></div>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="js/toast.js?v=1.0.1"></script>
-    <script src="js/sla.js?v=1.0.1"></script>
-    <script src="js/main.js?v=1.0.1"></script>
-    <script src="js/dashboard.js?v=1.0.1"></script>
-  </body>
+      <!-- Reports grid -->
+      <div class="reports-grid-v2" id="reportsGrid">
+        <!-- Skeleton cards -->
+        <div class="skeleton-card">
+          <div class="skeleton skeleton-img"></div>
+          <div class="skeleton-body">
+            <div class="skeleton skeleton-title w80"></div>
+            <div class="skeleton skeleton-line w60"></div>
+            <div class="skeleton skeleton-line w40"></div>
+          </div>
+        </div>
+        <div class="skeleton-card">
+          <div class="skeleton skeleton-img"></div>
+          <div class="skeleton-body">
+            <div class="skeleton skeleton-title w80"></div>
+            <div class="skeleton skeleton-line w60"></div>
+            <div class="skeleton skeleton-line w40"></div>
+          </div>
+        </div>
+        <div class="skeleton-card">
+          <div class="skeleton skeleton-img"></div>
+          <div class="skeleton-body">
+            <div class="skeleton skeleton-title w80"></div>
+            <div class="skeleton skeleton-line w60"></div>
+            <div class="skeleton skeleton-line w40"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/toast.js"></script>
+  <script src="js/sla.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/dashboard.js?v=2.0"></script>
+</body>
 </html>

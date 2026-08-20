@@ -1,36 +1,12 @@
 /**
- * Role-based access control middleware.
- *
- * Usage:
- *   const checkRole = require('./middleware/checkRole');
- *   app.delete('/api/reports/:id', checkRole(['admin']), handler);
- *
- * Reads the 'x-user-role' header from the incoming request and
- * compares it against the list of allowed roles. Returns 403
- * with a user-friendly message if the role is not permitted.
+ * checkRole — Legacy compatibility shim.
+ * 
+ * The new role-checking is now done via the `checkRole` factory in middleware/auth.js.
+ * This file is kept for backward compatibility with any legacy code that imports it directly.
+ * 
+ * New usage: const { checkRole } = require('../middleware/auth');
  */
-function checkRole(allowedRoles) {
-    return (req, res, next) => {
-        const role = (req.headers['x-user-role'] || '').trim().toLowerCase();
 
-        if (!role) {
-            return res.status(403).json({
-                success: false,
-                data: null,
-                error: 'Access denied. No role provided. Please log in first.'
-            });
-        }
-
-        if (!allowedRoles.includes(role)) {
-            return res.status(403).json({
-                success: false,
-                data: null,
-                error: 'Access denied. You do not have permission to perform this action.'
-            });
-        }
-
-        next();
-    };
-}
+const { checkRole } = require('./auth');
 
 module.exports = checkRole;

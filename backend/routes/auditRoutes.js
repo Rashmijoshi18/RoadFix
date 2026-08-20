@@ -1,19 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const checkRole = require('../middleware/checkRole');
+const { authenticateToken, checkRole } = require('../middleware/auth');
 const { getAllAuditLogs } = require('../db/auditDatabase');
 
-// GET /api/audit — returns all logs, protected for admin only
-router.get('/', checkRole(['admin']), async (req, res) => {
+// GET /api/audit — admin-only audit log
+router.get('/', authenticateToken, checkRole('admin', 'super_admin'), async (req, res, next) => {
     try {
         const logs = await getAllAuditLogs();
         return res.json({ success: true, data: logs, error: null });
     } catch (err) {
-        console.error('Audit GET Error:', err.message);
-        return res.status(500).json({ success: false, data: null, error: 'Failed to fetch audit logs.' });
+        next(err);
     }
 });
-
-// No DELETE endpoint because logs are immutable
 
 module.exports = router;

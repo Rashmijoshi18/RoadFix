@@ -5,41 +5,65 @@ const { Server } = require('socket.io');
 
 const app = require('./app');
 const reportController = require('./controllers/reportController');
-const { connectToDatabase, ensureIndexes, seedDefaultUsers } = require('./db/mongoClient');
+const { connectToDatabase, ensureIndexes, seedDefaultUsers, seedZonesAndWards } = require('./db/mongoClient');
+const logger = require('./middleware/logger');
 
 const httpServer = http.createServer(app);
 
-// Attach socket.io
+// ─── Socket.IO ────────────────────────────────────────────────────────────────
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000').split(',').map(o => o.trim());
+
 const io = new Server(httpServer, {
-    cors: { origin: "*" }
+    cors: {
+        origin: process.env.NODE_ENV === 'production' ? allowedOrigins : '*',
+        credentials: true
+    }
 });
 
-// Export IO cleanly avoiding circular dependencies
 reportController.setIO(io);
 
 const PORT = process.env.PORT || 3000;
 
-// ----- SOCKET.IO LOGIC -----
+// ─── Socket.IO — Connection Handling ─────────────────────────────────────────
 io.on('connection', (socket) => {
-    console.log('Client connected:', socket.id);
+    logger.info(`Socket connected: ${socket.id}`);
+
+    // User joins their personal room for targeted notifications
+    socket.on('join:user', (userId) => {
+        if (userId) {
+            socket.join(`user:${userId}`);
+            logger.info(`Socket ${socket.id} joined room: user:${userId}`);
+        }
+    });
+
+    // User joins their role-based room
+    socket.on('join:role', (role) => {
+        if (role) {
+            socket.join(`role:${role}`);
+            logger.info(`Socket ${socket.id} joined room: role:${role}`);
+        }
+    });
+
     socket.on('disconnect', () => {
-        console.log('Client left:', socket.id);
+        logger.info(`Socket disconnected: ${socket.id}`);
     });
 });
 
-// ----- START SERVER -----
+// ─── Start Server ─────────────────────────────────────────────────────────────
 async function startServer() {
     try {
         await connectToDatabase();
         await ensureIndexes();
         await seedDefaultUsers();
+        await seedZonesAndWards();
 
         httpServer.listen(PORT, () => {
-            console.log(`Server running on port ${PORT}`);
-            console.log('MongoDB connection established');
+            logger.info(`RoadFix server running on port ${PORT}`);
+            logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+            logger.info(`Dashboard: http://localhost:${PORT}`);
         });
     } catch (err) {
-        console.error('Failed to start server:', err.message);
+        logger.error(`Failed to start server: ${err.message}`, { stack: err.stack });
         process.exit(1);
     }
 }

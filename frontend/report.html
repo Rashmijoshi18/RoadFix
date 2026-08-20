@@ -62,46 +62,9 @@
         </div>
       </div>
     </nav>
+    <script src="js/api.js"></script>
     <script>
-      (function () {
-        const role = localStorage.getItem("userRole"),
-          name = localStorage.getItem("userName");
-        if (!role) {
-          window.location.href = "login.html";
-          return;
-        }
-        if (role === "admin") {
-          const a = document.getElementById("auditNavLink");
-          if (a) a.style.display = "block";
-        }
-        const info = document.getElementById("navUserInfo");
-        if (info) {
-          info.innerHTML =
-            '<button class="btn-logout" id="logoutBtn" title="Logout" aria-label="Logout"><i class="fas fa-sign-out-alt"></i></button>';
-        }
-
-        window.handleLogout = async function () {
-          try {
-            await fetch("/api/auth/logout", {
-              method: "POST",
-              headers: {
-                "x-user-role": role || "unknown",
-                "x-user-id": localStorage.getItem("userId") || "unknown",
-                "x-user-name": name || "Unknown",
-              },
-            });
-          } catch (e) {
-            console.error("Logout error:", e);
-          }
-          localStorage.clear();
-          window.location.href = "login.html";
-        };
-
-        const logoutBtn = document.getElementById("logoutBtn");
-        if (logoutBtn) {
-          logoutBtn.addEventListener("click", window.handleLogout);
-        }
-      })();
+      // Auth guard — handled in app.js via Session.require()
     </script>
 
     <main
@@ -169,7 +132,21 @@
               <option value="Blocked Drain">Blocked Drain</option>
               <option value="Streetlight Issue">Streetlight Issue</option>
               <option value="Faded Road Signs">Faded Road Signs</option>
+              <option value="Road Damage">Road Damage</option>
+              <option value="Encroachment">Encroachment</option>
               <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="severity"
+              ><i class="fas fa-exclamation-circle"></i> Severity
+              <span style="color:var(--text-muted);font-weight:400">(AI auto-fills)</span></label
+            >
+            <select id="severity" name="priority">
+              <option value="Low">Low — Minor inconvenience</option>
+              <option value="Medium" selected>Medium — Moderate risk</option>
+              <option value="High">High — Significant hazard</option>
+              <option value="Critical">Critical — Immediate danger</option>
             </select>
           </div>
           <div class="form-group">
@@ -215,7 +192,7 @@
             <label
               ><i class="fas fa-camera"></i> Upload Photo
               <span style="color: var(--text-muted); font-weight: 400"
-                >(optional, max 5MB)</span
+                >(optional, max 5MB — AI will verify it)</span
               ></label
             >
             <div class="file-upload-wrapper">
@@ -223,11 +200,15 @@
               <div class="file-upload-content" id="uploadPrompt">
                 <i class="fas fa-cloud-upload-alt"></i>
                 <div class="file-upload-text">Drag and drop or click to upload</div>
-                <div class="file-upload-help">PNG, JPG, GIF up to 5MB</div>
+                <div class="file-upload-help">PNG, JPG up to 5MB — AI verified</div>
               </div>
               <img id="imagePreview" alt="Image Preview" />
             </div>
           </div>
+          <!-- AI Analysis Panel (populated by JS) -->
+          <div id="aiPanel"></div>
+          <!-- Duplicate Detection Panel (populated by JS) -->
+          <div id="duplicatePanel"></div>
           <div id="formMessage" class="message hidden"></div>
           <button
             type="submit"
@@ -243,8 +224,9 @@
 
     <div id="toast-container" class="toast-container"></div>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="js/toast.js?v=1.0.1"></script>
-    <script src="js/main.js?v=1.0.1"></script>
-    <script src="js/app.js?v=1.0.1"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/app.js?v=2.0"></script>
   </body>
 </html>
