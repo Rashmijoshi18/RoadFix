@@ -191,3 +191,17 @@
 [2026-08-19 11:48:55] INFO: Socket Ehfj7QaW7h9KZyBzAAAB joined room: role:citizen
 [2026-08-19 11:48:55] INFO: Socket Ehfj7QaW7h9KZyBzAAAB joined room: user:user_rashmi_001
 [2026-08-19 11:50:54] INFO: Socket disconnected: Ehfj7QaW7h9KZyBzAAAB
+[2026-08-20 10:46:37] INFO: Connected to MongoDB: roadfix
+[2026-08-20 10:46:37] INFO: Database indexes ensured
+[2026-08-20 10:46:37] INFO: RoadFix server running on port 3000
+[2026-08-20 10:46:37] INFO: Environment: development
+[2026-08-20 10:46:37] INFO: Dashboard: http://localhost:3000
+[2026-08-20 10:46:48] INFO: Token silently refreshed for user: rashmijoshi369@gmail.com
+[2026-08-20 10:46:53] INFO: Socket connected: gIuFnG9c3uATNitRAAAB
+[2026-08-20 10:46:53] INFO: Socket gIuFnG9c3uATNitRAAAB joined room: user:user_rashmi_001
+[2026-08-20 10:46:53] INFO: Socket gIuFnG9c3uATNitRAAAB joined room: role:citizen
+[2026-08-20 10:47:01] INFO: Socket connected: W37qFexWVl6q036DAAAD
+[2026-08-20 10:47:01] INFO: Socket W37qFexWVl6q036DAAAD joined room: user:user_rashmi_001
+[2026-08-20 10:47:01] INFO: Socket W37qFexWVl6q036DAAAD joined room: role:citizen
+[2026-08-20 10:47:18] INFO: Socket disconnected: gIuFnG9c3uATNitRAAAB
+[2026-08-20 10:47:46] INFO: Socket disconnected: W37qFexWVl6q036DAAAD
